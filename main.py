@@ -3,6 +3,7 @@ print("Unsere Meteoroiden-Simulation startet in !")
 print("3")
 print("2")
 print("1")
+print("Los geht's!")
 
 # Model: 
 # Sonne steht im Ursprung fest
