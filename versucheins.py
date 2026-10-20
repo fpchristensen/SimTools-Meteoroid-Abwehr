@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-a = 1.496e11 #Gr0ße Halbachse der Umlaufbahn der Ellipse
+a = 1.496e11 #Große Halbachse der Umlaufbahn der Ellipse
 e = 0.0167 #Exzentrizität
 G = 6.67430e-11
 Ms = 1.989e30
