@@ -18,3 +18,18 @@ print("Los geht's!")
 # Stöße -> elastisch/inelastisch
 
 # Atmosphäre beeinflusst System?
+
+
+#Annahnen: alle Einzelsysteme sind kugelförmig
+#           Erde und Asteroid werden voneinander und von Sonne angezogen
+
+#Was ist eine gute Datenstruktur
+#wie mus es aussehen
+#gleiche oder unterschiedliche Zeitstruktur
+#Code shematisch anordnen 
+#Code wiederverwenden (Beschleunigungsformel zählt für Erde und für Meteorid)
+#Code vereinheitlichen
+
+#Wie kann die Abwehr aussehen
+#Impuls
+#Rakete im nächsten Schritt, da mit anderen Teilsystemen reagiert
