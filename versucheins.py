@@ -35,10 +35,21 @@ for n in range(N): #Idee ist das Euler-Verfahren zu benutzen
     vy_Werte.append(v_Erde[1])
 
 
-plt.plot(x_Werte, y_Werte, label = "Erdbahn")
-plt.plot(0, 0, "o", color = "orange", label = "Sonne")
+plt.plot(x_Werte, y_Werte, label="Erdbahn")
+plt.plot(0, 0, "o", color="orange", label="Sonne")
 plt.axis("equal")
-plt.xlabel("x in m")
-plt.ylabel("y in m")
+plt.xlabel("x (m)")
+plt.ylabel("y (m)")
+
+erdpunkt, = plt.plot(
+    x_Werte[0], y_Werte[0], "o",
+    label="Erde", color="blue"
+)
+
 plt.legend()
+
+for i in range(1, len(x_Werte), 24):
+    erdpunkt.set_data([x_Werte[i]], [y_Werte[i]]) #jede 24. Position
+    plt.pause(0.01) #Abwarten nach jeder Bildsetzung, damit nicht nur der Endzustand sichtbar ist
+
 plt.show()
