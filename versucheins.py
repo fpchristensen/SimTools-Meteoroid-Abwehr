@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+#import aus matplotlib func-animation
 
-a = 1.496e11 #Große Halbachse der Umlaufbahn der Ellipse
-e = 0.0167 #Exzentrizität
+a_Ellipse = 1.496e11 #Große Halbachse der Umlaufbahn der Ellipse
+e_Ellipse = 0.0167 #Exzentrizität
 G = 6.67430e-11
 Ms = 1.989e30
 
@@ -12,8 +13,8 @@ N = int(365.25 * 24)
 dt = T / N #Aktuell ist Delta T eine Stunde
 
 t0 = 0
-r_Erde = np.array([a * (1 - e), 0]) #Ortsvektor zum Zeitpunkt t = 0
-v_Erde = np.array([0, np.sqrt(G * Ms * (1 + e) / (a * (1 - e)))]) #Geschwindigkeisvektor zum Zeitpunkt t = 0
+r_Erde = np.array([a_Ellipse * (1 - e_Ellipse), 0]) #Ortsvektor zum Zeitpunkt t = 0
+v_Erde = np.array([0, np.sqrt(G * Ms * (1 + e_Ellipse) / (a_Ellipse * (1 - e_Ellipse)))]) #Geschwindigkeisvektor zum Zeitpunkt t = 0
 
 x_Werte = [r_Erde[0]]
 y_Werte = [r_Erde[1]]
@@ -44,7 +45,7 @@ plt.ylabel("y (m)")
 erdpunkt, = plt.plot(
     x_Werte[0], y_Werte[0], "o",
     label="Erde", color="blue"
-)
+) #Komma öffnet die Liste 
 
 plt.legend()
 
