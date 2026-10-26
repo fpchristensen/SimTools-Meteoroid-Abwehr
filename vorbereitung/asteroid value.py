@@ -1,7 +1,7 @@
 import numpy as np
 
 M_Asteroid = 1.0e10     #Masse in kg
-R_Asteroid =100         #Radius in m
+R_Asteroid = 100         #Radius in m
 
 #Anfangsbedingungen für den Asteroiden:
 r_Asteroid = np.array([1.50e11, 1.0e10], dtype=float) #Ortsvektor zum Zeitpunkt t = 0
@@ -14,7 +14,7 @@ def bescheunigung(position, other_objects):
 
     for objekt in other_objects:
        direction = objekt["position"] - position  #Ortsvektor im Bezug auf andere Himmelskörper
-       distance = np.linalg.norm(direction)
+       distance = np.linalg.norm(direction) #radius einbinden und nie null
 
        if distance == 0:
            raise ValueError("Zusammenstoß beim start!!!")

@@ -16,10 +16,8 @@ t0 = 0
 r_Erde = np.array([a_Ellipse * (1 - e_Ellipse), 0]) #Ortsvektor zum Zeitpunkt t = 0
 v_Erde = np.array([0, np.sqrt(G * Ms * (1 + e_Ellipse) / (a_Ellipse * (1 - e_Ellipse)))]) #Geschwindigkeisvektor zum Zeitpunkt t = 0
 
-x_Werte = [r_Erde[0]]
-y_Werte = [r_Erde[1]]
-vx_Werte = [v_Erde[0]]
-vy_Werte = [v_Erde[1]]
+r_Werte = [r_Erde]
+v_Werte = [v_Erde]
 
 for n in range(N): #Idee ist das Euler-Verfahren zu benutzen
     tn = t0 + n * dt #Zeitpunkte an denen die Geschwindigkeit und der Standort berechnet wird
@@ -30,27 +28,27 @@ for n in range(N): #Idee ist das Euler-Verfahren zu benutzen
     v_Erde = v_Erde + a_Erde * dt
     r_Erde = r_Erde + v_Erde * dt
 
-    x_Werte.append(r_Erde[0])
-    y_Werte.append(r_Erde[1])
-    vx_Werte.append(v_Erde[0])
-    vy_Werte.append(v_Erde[1])
+    r_Werte.append(r_Erde)
+    v_Werte.append(v_Erde)
 
+r_Werte = np.array(r_Werte)
+v_Werte = np.array(v_Werte)
 
-plt.plot(x_Werte, y_Werte, label="Erdbahn")
+plt.plot(r_Werte[:, 0], r_Werte[:, 1], label="Erdbahn")
 plt.plot(0, 0, "o", color="orange", label="Sonne")
 plt.axis("equal")
 plt.xlabel("x (m)")
 plt.ylabel("y (m)")
 
 erdpunkt, = plt.plot(
-    x_Werte[0], y_Werte[0], "o",
+    r_Werte[:, 0], r_Werte[:, 1], "o",
     label="Erde", color="blue"
 ) #Komma öffnet die Liste 
 
 plt.legend()
 
-for i in range(1, len(x_Werte), 24):
-    erdpunkt.set_data([x_Werte[i]], [y_Werte[i]]) #jede 24. Position
+for i in range(1, len(r_Werte), 24):
+    erdpunkt.set_data([r_Werte[i, 0]], [r_Werte[i, 1]]) #jede 24. Position
     plt.pause(0.01) #Abwarten nach jeder Bildsetzung, damit nicht nur der Endzustand sichtbar ist
 
 plt.show()
