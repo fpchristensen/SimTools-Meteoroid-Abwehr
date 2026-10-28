@@ -42,11 +42,13 @@ koerper = [(t_Erde, r_Erde, erdpunkt),(t_Meteorid, r_Meteorid, meteoridenpunkt)]
 ax.set_aspect("equal")
 ax.legend(loc="upper right")
 
+#
 start = max(t_Erde[0], t_Meteorid[0])
 ende = min(t_Erde[-1], t_Meteorid[-1])
 animationszeiten = np.arange(start, ende, 24 * 60 * 60)
 
 animation = animieren(fig, koerper, animationszeiten)
+#
 
 plt.show()
 
