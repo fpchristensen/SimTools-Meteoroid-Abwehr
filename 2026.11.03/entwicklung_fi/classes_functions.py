@@ -1,13 +1,16 @@
+
 import numpy as np
 from values import G
 
+
 class CelestialBody:
-    def __init__(self, name, mass, radius, r, v):       #Körper initialisiert, Anleitung
+    def __init__(self, name, mass, radius, r, v):
         self.name = name
         self.mass = mass
         self.radius = radius
-        self.r = np.array(r, dtype = float)
-        self.v = np.array(v, dtype = float)
+        self.r = np.array(r, dtype=float)
+        self.v = np.array(v, dtype=float)
+
 
 def orbital_data(axis, eccentricity, central_mass):
     r = np.array([
@@ -28,7 +31,7 @@ def acceleration(body, other_bodies):
     a = np.array([0.0, 0.0])
 
     for other_body in other_bodies:
-        if other_body is body:  # Eigener Körper zieht sich nicht an
+        if other_body is body:
             continue
 
         direction = other_body.r - body.r
@@ -43,23 +46,30 @@ def acceleration(body, other_bodies):
 
     return a
 
-def simulate_system(bodies, N, dt):          #Bewegung, sprich Orts- und Geschwindigkeitsvektoren
-    
-    r_values = np.zeros((N + 1, len(bodies), 2))        # Speicher für alle Positionen und Geschwindigkeiten, dreidimensionales Array: (Zeitschritte, Körper, Koordinaten)
-    v_values = np.zeros((N + 1, len(bodies), 2))
 
-    for i, body in enumerate(bodies):
-        r_values[0, i] = body.r
-        v_values[0, i] = body.v
+def simulate_system(bodies, N, dt):
+
+    # Listen für alle Positionen und Geschwindigkeiten
+    r_list = []
+    v_list = []
+
+    # Anfangswerte speichern
+    r_list.append([body.r.copy() for body in bodies])
+    v_list.append([body.v.copy() for body in bodies])
 
     for n in range(N):
 
         # Beschleunigungen aller Körper berechnen
         accelerations = []
 
-        for body in bodies:
-            a = acceleration(body, bodies)
-            accelerations.append(a)
+        try:
+            for body in bodies:
+                a = acceleration(body, bodies)
+                accelerations.append(a)
+
+        except ValueError as e:
+            print(f"Fehler in Zeitschritt {n}: {e}")
+            break
 
         # Alle Körper bewegen
         for i, body in enumerate(bodies):
@@ -68,9 +78,12 @@ def simulate_system(bodies, N, dt):          #Bewegung, sprich Orts- und Geschwi
             body.v = body.v + accelerations[i] * dt
             body.r = body.r + body.v * dt
 
-            # Neue Werte speichern
-            r_values[n + 1, i] = body.r
-            v_values[n + 1, i] = body.v
+        # Neue Werte in den Listen speichern
+        r_list.append([body.r.copy() for body in bodies])
+        v_list.append([body.v.copy() for body in bodies])
+
+    # Listen in NumPy-Arrays umwandeln
+    r_values = np.array(r_list)
+    v_values = np.array(v_list)
 
     return r_values, v_values
-
