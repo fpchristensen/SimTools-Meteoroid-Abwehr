@@ -35,10 +35,10 @@ def main():
     # Asteroid
     asteroid = CelestialBody(
         "Asteroid",
-        M_Asteroid,
-        R_Asteroid,
-        r_Asteroid,
-        v_Asteroid
+        M_Asteroid_4,
+        R_Asteroid_4,
+        r_Asteroid_4,
+        v_Asteroid_4
     )
 
     # Alle Himmelskörper zusammenfassen
