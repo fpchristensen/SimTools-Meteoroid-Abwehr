@@ -1,3 +1,10 @@
+"""Konstanten und Anfangswerte für die Himmelskörpersimulation.
+
+Massen in kg, Radien und Positionen in m, Geschwindigkeiten in m/s,
+Zeiten in s und die Gravitationskonstante G in m³/(kg·s²).
+Die Simulation verwendet N Zeitschritte der Länge dt.
+"""
+
 a_Ellipse = 1.496e11
 e_Ellipse = 0.0167
 G = 6.67430e-11

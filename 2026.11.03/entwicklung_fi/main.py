@@ -1,3 +1,9 @@
+"""Startpunkt der Simulation zur Meteoroidenabwehr.
+
+Vergleicht einen ersten Durchlauf ohne Abwehr mit einem zweiten Durchlauf,
+bei dem ein vorgegebener Impuls auf den betroffenen Meteoroiden wirkt.
+"""
+
 from values import (
     N, dt,
     a_Ellipse, e_Ellipse,
@@ -22,6 +28,15 @@ from aniUI import animate_system
 def create_bodies():
     # Neue Himmelskoerper, damit der zweite Durchlauf
     # mit genau denselben Anfangswerten startet.
+    """Erzeugt Sonne, Erde und zwei Meteoroiden mit ihren Anfangswerten.
+    
+    Für jeden Simulationsdurchlauf werden neue Objekte angelegt, damit die
+    beiden Versuche mit denselben Startbedingungen beginnen.
+    
+    Returns:
+        list[CelestialBody]: Sonne, Erde, Meteoroid 1 und Meteoroid 2.
+    """
+
     sun = CelestialBody(
         "Sonne", m_Sonne, radius_Sonne, [0.0, 0.0], [0.0, 0.0]
     )
@@ -48,6 +63,14 @@ def create_bodies():
 
 def main():
     # 1. Simulation ohne Abwehr
+    """Steuert den Vergleich zwischen einer Simulation ohne und mit Abwehr.
+    
+    Startet zuerst die Simulation ohne Impuls und zeigt deren Animation.
+    Bei einer Meteoroidenkollision werden Eingaben für die Ablenkung
+    abgefragt. Anschließend startet eine neue Simulation mit identischen
+    Anfangswerten und der gewünschten Impulsablenkung.
+    """
+
     bodies = create_bodies()
     r_values, v_values, collision = simulate_system(bodies, N, dt)
 
