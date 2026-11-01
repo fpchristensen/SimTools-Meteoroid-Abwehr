@@ -199,3 +199,27 @@ def simulate_system(bodies, N, dt,
             break
 
     return np.array(r_list), np.array(v_list), collision
+
+
+
+def start_defense(frame, angle, impulse, meteorite_name,
+                  create_bodies, N, dt):
+    """Berechnet den Abwehrversuch mit den gewählten Eingaben."""
+
+    new_bodies = create_bodies()
+
+    meteorite = next(
+        body for body in new_bodies if body.name == meteorite_name
+    )
+
+    time = frame * dt
+
+    new_r_values, _, new_collision = simulate_system(
+        new_bodies, N, dt,
+        meteorite=meteorite,
+        impulse=impulse,
+        time=time,
+        angle=angle,
+    )
+
+    return new_r_values, new_collision

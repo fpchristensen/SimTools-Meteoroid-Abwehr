@@ -12,6 +12,12 @@ from values import (
 )
 from classes_functions import CelestialBody, orbital_data, simulate_system
 from aniUI import animate_system
+from classes_functions import (
+    CelestialBody,
+    orbital_data,
+    simulate_system,
+    start_defense
+)
 
 
 def create_bodies():
@@ -68,31 +74,7 @@ def main():
         return
 
     # 2. Wird erst beim Klick auf den Play-Button aufgerufen.
-    def start_defense(frame, angle, impulse):
-        """Berechnet den Abwehrversuch mit den drei gewählten Eingaben.
-
-        Args:
-            frame (int): Zeitschritt der Ablenkung (aus Zeitregler).
-            angle (float): Ablenkwinkel in Grad (aus Drehregler).
-            impulse (float): Impulsbetrag in N·s (aus Dropdown).
-
-        Returns:
-            tuple: Neuer Positionsverlauf und mögliche Kollision.
-        """
-        new_bodies = create_bodies()
-        meteorite = next(
-            body for body in new_bodies if body.name == meteorite_name
-        )
-        # Beispiel: Frame 192 * dt=3600 s -> Impuls an Tag 8.
-        time = frame * dt
-        new_r_values, _, new_collision = simulate_system(
-            new_bodies, N, dt,
-            meteorite=meteorite,
-            impulse=impulse,
-            time=time,
-            angle=angle,
-        )
-        return new_r_values, new_collision
+    
 
     # Zeigt zunächst den bekannten Verlauf zum freien Durchspulen.
     # Play startet die neue Simulation mit den gewählten Werten.
@@ -101,7 +83,10 @@ def main():
         collision=collision,
         title="2. Versuch: Mit Abwehr",
         controls=True,
-        on_play=start_defense,
+        on_play=lambda frame, angle, impulse: start_defense(
+            frame, angle, impulse,
+            meteorite_name, create_bodies, N, dt
+        )
     )
 
 
