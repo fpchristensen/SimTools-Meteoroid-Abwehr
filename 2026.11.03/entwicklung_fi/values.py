@@ -1,8 +1,7 @@
-"""Konstanten und Anfangswerte für die Himmelskörpersimulation.
+"""Konstanten, Anfangsbedingungen und Abwehrmethoden der Simulation.
 
-Massen in kg, Radien und Positionen in m, Geschwindigkeiten in m/s,
-Zeiten in s und die Gravitationskonstante G in m³/(kg·s²).
-Die Simulation verwendet N Zeitschritte der Länge dt.
+Einheiten: Massen in kg, Positionen und Radien in m, Geschwindigkeiten
+in m/s, Zeit in s und Impulse in N·s.
 """
 
 a_Ellipse = 1.496e11
@@ -14,8 +13,8 @@ radius_Sonne = 6.9634e8
 
 m_Meteorid1 = 1.0e10
 radius_Meteorid1 = 70
-r_Meteorid1 = [-3.0 * a_Ellipse, 1.0 * a_Ellipse]
-v_Meteorid1 = [35000.0, 0.0]
+r_Meteorid1 = [-1.5e11, 8.0e10]
+v_Meteorid1 = [14812.0, 22581.7]
 
 m_Meteorid2 = 1.0e10
 radius_Meteorid2 = 100
@@ -30,3 +29,10 @@ N = int(365.25 * 24)
 dt = T / N
 
 t0 = 0
+
+# Vereinfachte, beispielhafte Impulsbeträge (keine exakten Realwerte).
+ABWEHR_METHODEN = {
+    "Satellitenstoß": 2.0e7,
+    "Rakete": 2.4e8,
+    "Explosion": 1.0e11,
+}
