@@ -76,12 +76,12 @@ def acceleration(body, other_bodies):
         direction = other_body.r - body.r
         distance = np.linalg.norm(direction)
         if distance == 0:
-            raise ValueError("Zwei Koerper befinden sich am selben Ort.")
+            raise ValueError("Zwei Koerper befinden sich am selben Ort.") #sicherheit das wir nicht durch 0 Teilen
         a += G * other_body.mass * direction / distance**3
     return a
 
 
-def check_collision(bodies):
+def check_collision(bodies): #damit wir weiter machen können nach kollision nicht einfach fehler haben.
     """Sucht das erste Körperpaar, dessen Radien sich berühren.
 
     Args:
@@ -117,11 +117,11 @@ def deflect_meteorite(meteorite, impulse, angle):
     if meteorite.mass <= 0:
         raise ValueError("Die Masse des Meteoriten muss positiv sein.")
 
-    angle_rad = np.radians(angle)
+    angle_rad = np.radians(angle)       #bogenmaß umrechnen
     impulse_vector = impulse * np.array([
         np.cos(angle_rad), np.sin(angle_rad)
     ])
-    meteorite.v += impulse_vector / meteorite.mass
+    meteorite.v += impulse_vector / meteorite.mass 
 
 
 def simulate_system(bodies, N, dt,
@@ -149,6 +149,7 @@ def simulate_system(bodies, N, dt,
         ValueError: Bei ungültiger Zeit, ungültigem dt, unbekanntem
             Meteoroiden oder sich bereits am Start berührenden Körpern.
     """
+    #sicherheits checks
     if time < 0:
         raise ValueError("Der Ablenkungszeitpunkt darf nicht negativ sein.")
     if dt <= 0:
