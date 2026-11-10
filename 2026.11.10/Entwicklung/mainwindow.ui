@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1360</width>
+    <height>850</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SimTools – Meteoroidenabwehr</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,6,2">
+    <item>
+     <widget class="QGroupBox" name="asteroid">
+      <property name="title">
+       <string>Asteroid</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QListWidget" name="listWidget" />
+         </item>
+         <item>
+          <widget class="QLabel" name="Szenario">
+           <property name="text">
+            <string>Szenario</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="SzenarioAuswahl">
+           <item>
+            <property name="text">
+             <string>Vorbeiflug</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Kollision</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="Asteroidenwahl">
+           <property name="text">
+            <string>Asteroidenauswahl</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="AsteroidenAuswahl">
+           <item>
+            <property name="text">
+             <string>Klein und Leicht</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Eigener Asteroid</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Groß und Schwer</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="Durchmesser">
+           <property name="text">
+            <string>Durchmesser</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="GroesseEingabe" />
+         </item>
+         <item>
+          <widget class="QLabel" name="Masse">
+           <property name="text">
+            <string>Masse</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="GewichtEingabe" />
+         </item>
+         <item>
+          <widget class="QLabel" name="Geschwindigkeit">
+           <property name="text">
+            <string>Geschwindigkeitsrichtung</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDial" name="GeschwindigkeitsRichtung" />
+         </item>
+         <item>
+          <widget class="QLabel" name="Geschwindigkeitsstaerke">
+           <property name="text">
+            <string>Geschwindigkeitsstärke</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="GeschwindigkeitRegler">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="AsteroidHinzufuegen">
+           <property name="text">
+            <string>Asteroid hinzufügen</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="Simulationsbereich">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="7,1,1">
+         <item>
+          <widget class="QWidget" name="widget" />
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QPushButton" name="PlayButton">
+             <property name="text">
+              <string>Play</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="ZurueckButton">
+             <property name="text">
+              <string>Zurück</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="StopButton">
+             <property name="text">
+              <string>Stop</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QPushButton" name="ErdeFolgenButton">
+             <property name="text">
+              <string>Erde folgen</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="AsteroidFolgenButton">
+             <property name="text">
+              <string>Asteroid folgen</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="abwehrplan">
+      <property name="title">
+       <string>Abwehrplan</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0,0,0,0">
+         <item>
+          <widget class="QLabel" name="Impulsstaerke">
+           <property name="text">
+            <string>Impulsstärke</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="ImpulsstaerkeAuswahl">
+           <item>
+            <property name="text">
+             <string>stark (Explosion)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>mittel (Rakete)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>leicht (Satellitenstoß)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Eigene Stärke</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="EigeneImpulsstaerke">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="Impulsrichtung">
+           <property name="text">
+            <string>Impulsrichtung</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDial" name="ImpulsrichtungRegler">
+           <property name="maximum">
+            <number>359</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="Eingriffszeitpunkt">
+           <property name="text">
+            <string>Eingriffszeitpunkt</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="EingriffszeitpunktRegler">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="AbwehrDurchfuehrung">
+           <property name="text">
+            <string>Abwehr durchführen</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar" />
+  <widget class="QStatusBar" name="statusbar" />
+ </widget>
+ <resources />
+ <connections />
+</ui>

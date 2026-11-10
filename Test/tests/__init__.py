@@ -1,0 +1,2 @@
+"""Physiktests ohne Qt-Abhängigkeit.
+"""
