@@ -171,7 +171,7 @@
                   <item>
                     <widget class="QLabel" name="ZoomHinweis">
                       <property name="text">
-                        <string>Mausrad: Zoom · Rechtsklick halten: Ansicht verschieben · Doppelklick: zurücksetzen</string>
+                        <string></string>
                       </property>
                     </widget>
                   </item>
