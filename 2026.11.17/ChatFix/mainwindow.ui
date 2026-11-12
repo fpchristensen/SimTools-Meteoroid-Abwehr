@@ -1,0 +1,813 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ui version="4.0">
+  <class>MainWindow</class>
+  <widget class="QMainWindow" name="MainWindow">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1360</width>
+        <height>850</height>
+      </rect>
+    </property>
+    <property name="windowTitle">
+      <string>SimTools – Meteoroidenabwehr</string>
+    </property>
+    <widget class="QWidget" name="centralwidget">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0">
+        <item alignment="Qt::AlignTop">
+          <widget class="QGroupBox" name="meteoroid">
+            <property name="title">
+              <string>Meteoroid</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+                <layout class="QVBoxLayout" name="verticalLayout">
+                  <item>
+                    <widget class="QListWidget" name="listWidget">
+                      <property name="minimumHeight">
+                        <number>96</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>96</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <spacer name="meteoroidenListeAbstand">
+                      <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                        <enum>QSizePolicy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                        <size>
+                          <width>20</width>
+                          <height>6</height>
+                        </size>
+                      </property>
+                    </spacer>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="MeteoroidNameLabel">
+                      <property name="text">
+                        <string>Name (Enter zum Übernehmen)</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLineEdit" name="MeteoroidNameEingabe">
+                      <property name="minimumHeight">
+                        <number>27</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>27</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="Szenario">
+                      <property name="text">
+                        <string>Szenario</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="SzenarioAuswahl">
+                      <item>
+                        <property name="text">
+                          <string>Vorbeiflug</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Kollision</string>
+                        </property>
+                      </item>
+                      <property name="minimumHeight">
+                        <number>27</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>27</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="Meteoroidenwahl">
+                      <property name="text">
+                        <string>Meteoroidenauswahl</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="MeteoroidenAuswahl">
+                      <item>
+                        <property name="text">
+                          <string>Klein und Leicht</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Eigener Meteoroid</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Groß und Schwer</string>
+                        </property>
+                      </item>
+                      <property name="minimumHeight">
+                        <number>27</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>27</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="KatalogLabel">
+                      <property name="text">
+                        <string>Einschlagbahn aus der Datenbank</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="KatalogAuswahl">
+                      <property name="minimumHeight">
+                        <number>27</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>27</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="Durchmesser">
+                      <property name="text">
+                        <string>Durchmesser</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QDoubleSpinBox" name="GroesseEingabe">
+                      <property name="minimumHeight">
+                        <number>27</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>27</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="Masse">
+                      <property name="text">
+                        <string>Masse</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QDoubleSpinBox" name="GewichtEingabe">
+                      <property name="minimumHeight">
+                        <number>27</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>27</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="Geschwindigkeit">
+                      <property name="text">
+                        <string>Geschwindigkeitsrichtung</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QDial" name="GeschwindigkeitsRichtung">
+                      <property name="minimumWidth">
+                        <number>78</number>
+                      </property>
+                      <property name="maximumWidth">
+                        <number>78</number>
+                      </property>
+                      <property name="minimumHeight">
+                        <number>78</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>78</number>
+                      </property>
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="Geschwindigkeitsstaerke">
+                      <property name="text">
+                        <string>Geschwindigkeitsstärke</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QSlider" name="GeschwindigkeitRegler">
+                      <property name="orientation">
+                        <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <layout class="QHBoxLayout" name="meteoroidButtonLayout">
+                      <item>
+                        <widget class="QPushButton" name="MeteoroidEntfernen">
+                          <property name="text">
+                            <string>Meteoroid entfernen</string>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="MeteoroidHinzufuegen">
+                          <property name="text">
+                            <string>Meteoroid hinzufügen</string>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                        </widget>
+                      </item>
+                    </layout>
+                  </item>
+                  <property name="spacing">
+                    <number>5</number>
+                  </property>
+                  <item>
+                    <spacer name="meteoroidenUntenAbstand">
+                      <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                        <enum>QSizePolicy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                        <size>
+                          <width>20</width>
+                          <height>9</height>
+                        </size>
+                      </property>
+                    </spacer>
+                  </item>
+                </layout>
+              </item>
+            </layout>
+            <property name="minimumWidth">
+              <number>325</number>
+            </property>
+            <property name="maximumWidth">
+              <number>325</number>
+            </property>
+            <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+              </sizepolicy>
+            </property>
+          </widget>
+        </item>
+        <item>
+          <widget class="QWidget" name="Simulationsbereich">
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+                <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0,0,0,0">
+                  <item>
+                    <widget class="QWidget" name="widget">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="ZoomHinweis">
+                      <property name="text">
+                        <string>Mausrad: Zoom · Rechtsklick halten: Ansicht verschieben · Doppelklick: zurücksetzen</string>
+                      </property>
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="alignment">
+                        <set>Qt::AlignCenter</set>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="SimulationszeitLabel">
+                      <property name="text">
+                        <string>Simulation: Tag 0.00</string>
+                      </property>
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="alignment">
+                        <set>Qt::AlignCenter</set>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                      <item>
+                        <spacer name="horizontalLayout_2_links">
+                          <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeType">
+                            <enum>QSizePolicy::Expanding</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                            <size>
+                              <width>20</width>
+                              <height>20</height>
+                            </size>
+                          </property>
+                        </spacer>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="PlayButton">
+                          <property name="text">
+                            <string>Play</string>
+                          </property>
+                          <property name="minimumWidth">
+                            <number>94</number>
+                          </property>
+                          <property name="maximumWidth">
+                            <number>94</number>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="sizePolicy">
+                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                            </sizepolicy>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="ZurueckButton">
+                          <property name="text">
+                            <string>Zurück</string>
+                          </property>
+                          <property name="minimumWidth">
+                            <number>94</number>
+                          </property>
+                          <property name="maximumWidth">
+                            <number>94</number>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="sizePolicy">
+                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                            </sizepolicy>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="StopButton">
+                          <property name="text">
+                            <string>Stop</string>
+                          </property>
+                          <property name="minimumWidth">
+                            <number>94</number>
+                          </property>
+                          <property name="maximumWidth">
+                            <number>94</number>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="sizePolicy">
+                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                            </sizepolicy>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <spacer name="horizontalLayout_2_rechts">
+                          <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeType">
+                            <enum>QSizePolicy::Expanding</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                            <size>
+                              <width>20</width>
+                              <height>20</height>
+                            </size>
+                          </property>
+                        </spacer>
+                      </item>
+                      <property name="spacing">
+                        <number>8</number>
+                      </property>
+                    </layout>
+                  </item>
+                  <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                      <item>
+                        <spacer name="horizontalLayout_3_links">
+                          <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeType">
+                            <enum>QSizePolicy::Expanding</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                            <size>
+                              <width>20</width>
+                              <height>20</height>
+                            </size>
+                          </property>
+                        </spacer>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="ErdeFolgenButton">
+                          <property name="text">
+                            <string>Erde folgen</string>
+                          </property>
+                          <property name="minimumWidth">
+                            <number>114</number>
+                          </property>
+                          <property name="maximumWidth">
+                            <number>114</number>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="sizePolicy">
+                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                            </sizepolicy>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="MeteoroidFolgenButton">
+                          <property name="text">
+                            <string>Meteoroid folgen</string>
+                          </property>
+                          <property name="minimumWidth">
+                            <number>135</number>
+                          </property>
+                          <property name="maximumWidth">
+                            <number>135</number>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="sizePolicy">
+                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                            </sizepolicy>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="SimulationTempoButton">
+                          <property name="text">
+                            <string>Tempo: 1×</string>
+                          </property>
+                          <property name="toolTip">
+                            <string>Abspielgeschwindigkeit wählen (0,5× bis 4×)</string>
+                          </property>
+                          <property name="minimumWidth">
+                            <number>112</number>
+                          </property>
+                          <property name="maximumWidth">
+                            <number>112</number>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="sizePolicy">
+                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                            </sizepolicy>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <spacer name="horizontalLayout_3_rechts">
+                          <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeType">
+                            <enum>QSizePolicy::Expanding</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                            <size>
+                              <width>20</width>
+                              <height>20</height>
+                            </size>
+                          </property>
+                        </spacer>
+                      </item>
+                      <property name="spacing">
+                        <number>8</number>
+                      </property>
+                    </layout>
+                  </item>
+                </layout>
+              </item>
+            </layout>
+            <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+              </sizepolicy>
+            </property>
+          </widget>
+        </item>
+        <item alignment="Qt::AlignTop">
+          <widget class="QGroupBox" name="abwehrplan">
+            <property name="title">
+              <string>Abwehrplan</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+                <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <item>
+                    <widget class="QLabel" name="Impulsstaerke">
+                      <property name="text">
+                        <string>Impulsstärke</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="ImpulsstaerkeAuswahl">
+                      <item>
+                        <property name="text">
+                          <string>stark (Explosion)</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>mittel (Rakete)</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>leicht (Satellitenstoß)</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Eigene Stärke</string>
+                        </property>
+                      </item>
+                      <property name="minimumHeight">
+                        <number>27</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>27</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QSlider" name="EigeneImpulsstaerke">
+                      <property name="orientation">
+                        <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="ImpulswirkungLabel">
+                      <property name="text">
+                        <string>Geschwindigkeitsänderung: –</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="Impulsrichtung">
+                      <property name="text">
+                        <string>Impulsrichtung</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QDial" name="ImpulsrichtungRegler">
+                      <property name="maximum">
+                        <number>359</number>
+                      </property>
+                      <property name="minimumWidth">
+                        <number>78</number>
+                      </property>
+                      <property name="maximumWidth">
+                        <number>78</number>
+                      </property>
+                      <property name="minimumHeight">
+                        <number>78</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>78</number>
+                      </property>
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="Eingriffszeitpunkt">
+                      <property name="text">
+                        <string>Eingriffszeitpunkt</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QSlider" name="EingriffszeitpunktRegler">
+                      <property name="orientation">
+                        <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="AbwehrDurchfuehrung">
+                      <property name="text">
+                        <string>Abwehr durchführen</string>
+                      </property>
+                      <property name="minimumHeight">
+                        <number>30</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>30</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="GeplanteAbwehrenLabel">
+                      <property name="text">
+                        <string>Geplante Abwehren (0) – Play zeigt alle</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QListWidget" name="GeplanteAbwehren">
+                      <property name="toolTip">
+                        <string>Alle vorgemerkten Impulse (Tag | Meteoroid | Winkel | Stärke)</string>
+                      </property>
+                      <property name="minimumHeight">
+                        <number>90</number>
+                      </property>
+                      <property name="maximumHeight">
+                        <number>90</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <spacer name="abwehrenListeAbstand">
+                      <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                        <enum>QSizePolicy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                        <size>
+                          <width>20</width>
+                          <height>6</height>
+                        </size>
+                      </property>
+                    </spacer>
+                  </item>
+                  <item>
+                    <layout class="QHBoxLayout" name="abwehrQueueButtons">
+                      <item>
+                        <widget class="QPushButton" name="AbwehrEntfernen">
+                          <property name="text">
+                            <string>Markierte entfernen</string>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="AlleAbwehrenLoeschen">
+                          <property name="text">
+                            <string>Alle löschen</string>
+                          </property>
+                          <property name="minimumHeight">
+                            <number>30</number>
+                          </property>
+                          <property name="maximumHeight">
+                            <number>30</number>
+                          </property>
+                        </widget>
+                      </item>
+                    </layout>
+                  </item>
+                  <property name="spacing">
+                    <number>5</number>
+                  </property>
+                  <item>
+                    <spacer name="abwehrenUntenAbstand">
+                      <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                        <enum>QSizePolicy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                        <size>
+                          <width>20</width>
+                          <height>9</height>
+                        </size>
+                      </property>
+                    </spacer>
+                  </item>
+                </layout>
+              </item>
+            </layout>
+            <property name="minimumWidth">
+              <number>300</number>
+            </property>
+            <property name="maximumWidth">
+              <number>300</number>
+            </property>
+            <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+              </sizepolicy>
+            </property>
+          </widget>
+        </item>
+        <property name="spacing">
+          <number>8</number>
+        </property>
+      </layout>
+    </widget>
+    <widget class="QMenuBar" name="menubar" />
+    <widget class="QStatusBar" name="statusbar" />
+    <property name="minimumSize">
+      <size>
+        <width>1120</width>
+        <height>735</height>
+      </size>
+    </property>
+  </widget>
+  <resources />
+  <connections />
+</ui>
