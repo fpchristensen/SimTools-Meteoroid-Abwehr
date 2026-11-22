@@ -118,6 +118,12 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.rebuild_timer.setSingleShot(True)
         self.rebuild_timer.timeout.connect(self.calculate_baseline)
 
+        # Einstellungen werden sofort gespeichert; die Bahn folgt nach einer
+        # kurzen Schiebepause, damit Regler nicht bei jedem Pixel neu rechnen.
+        self.defense_rebuild_timer = QtCore.QTimer(self)
+        self.defense_rebuild_timer.setSingleShot(True)
+        self.defense_rebuild_timer.timeout.connect(self.recalculate_defenses)
+
         self.setup_widgets()
         self.connect_signals()
         self.listWidget.addItem("Meteoroid 1")
@@ -176,10 +182,6 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.MeteoroidNameEingabe.setMaxLength(40)
         self.MeteoroidNameEingabe.setPlaceholderText("Name des Meteoroiden")
         self.MeteoroidEntfernen.setEnabled(True)
-        self.AbwehrDurchfuehrung.setText("Abwehr vormerken")
-        self.AbwehrDurchfuehrung.setToolTip(
-            "Speichert den Impuls. Mit Play werden alle Abwehren abgespielt."
-        )
         self.GeplanteAbwehren.setSelectionMode(
             QtWidgets.QAbstractItemView.SelectionMode.SingleSelection
         )
@@ -232,9 +234,15 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.EingriffszeitpunktRegler.valueChanged.connect(
             self.update_time_text
         )
-        self.AbwehrDurchfuehrung.clicked.connect(self.run_defense)
+        # Nur Benutzereingaben speichern: Beim Laden einer Auswahl werden
+        # die Regler mit quietly_set gesetzt und lösen diese Signale nicht aus.
+        self.ImpulsstaerkeAuswahl.currentIndexChanged.connect(self.save_selected_defense)
+        self.EigeneImpulsstaerke.valueChanged.connect(self.save_selected_defense)
+        self.ImpulsrichtungRegler.valueChanged.connect(self.save_selected_defense)
+        self.EingriffszeitpunktRegler.valueChanged.connect(self.save_selected_defense)
         self.AbwehrEntfernen.clicked.connect(self.remove_defense)
-        self.AlleAbwehrenLoeschen.clicked.connect(self.clear_defenses)
+        self.AbwehrHinzufuegen.clicked.connect(self.add_defense)
+        self.GeplanteAbwehren.currentItemChanged.connect(self.show_selected_defense)
 
     def selected_meteoroid(self):
         """Liefert den in der Liste markierten Meteoroiden oder None.
@@ -650,15 +658,32 @@ class SimulationWindow(QtWidgets.QMainWindow):
                 7000,
             )
 
-    def refresh_defense_queue(self):
-        """Zeigt alle vorgemerkten Aktionen in chronologischer Reihenfolge.
-        """
+    def saved_defenses(self):
+        """Liefert die angelegten, gültigen Abwehren für die Simulation."""
+        return [action for action in self.defense_actions
+                if action.get("saved", True)]
+
+    def selected_defense_index(self):
+        """Liefert den Index des ausgewählten Eintrags, auch nach Sortierung."""
+        item = self.GeplanteAbwehren.currentItem()
+        if item is None:
+            return None
+        index = item.data(QtCore.Qt.ItemDataRole.UserRole)
+        if index is not None and 0 <= index < len(self.defense_actions):
+            return index
+        return None
+
+    def refresh_defense_queue(self, selected_index=None):
+        """Zeigt die Aktionen, ohne beim Ändern die Auswahl zu verlieren."""
+        if selected_index is None:
+            selected_index = self.selected_defense_index()
+        blocked = self.GeplanteAbwehren.blockSignals(True)
         self.GeplanteAbwehren.clear()
-        for entry in sorted(
+        selected_item = None
+        for original_index, action in sorted(
             enumerate(self.defense_actions),
             key=lambda pair: (pair[1]["frame"], pair[0]),
         ):
-            original_index, action = entry
             day = action["frame"] * dt / 86400
             text = (
                 f"Tag {day:.2f} | {action['target']} | "
@@ -667,11 +692,65 @@ class SimulationWindow(QtWidgets.QMainWindow):
             item = QtWidgets.QListWidgetItem(text)
             item.setData(QtCore.Qt.ItemDataRole.UserRole, original_index)
             self.GeplanteAbwehren.addItem(item)
-        self.AbwehrEntfernen.setEnabled(bool(self.defense_actions))
-        self.AlleAbwehrenLoeschen.setEnabled(bool(self.defense_actions))
-        self.GeplanteAbwehrenLabel.setText(
-            f"Geplante Abwehren ({len(self.defense_actions)}) – Play zeigt alle"
+            if original_index == selected_index:
+                selected_item = item
+        if selected_item is not None:
+            self.GeplanteAbwehren.setCurrentItem(selected_item)
+        self.GeplanteAbwehren.blockSignals(blocked)
+        self.AbwehrEntfernen.setEnabled(selected_item is not None)
+        self.AbwehrHinzufuegen.setEnabled(True)
+        # Ersetzt das entfernte Zähler-Label, ohne ein neues Widget anzulegen.
+        self.GeplanteAbwehren.setToolTip(
+            f"{len(self.saved_defenses())} gespeicherte Abwehr(en). "
+            "Auswählen und unten bearbeiten: Änderungen werden direkt übernommen."
         )
+
+    def add_defense(self):
+        """Legt genau eine Abwehr mit den aktuellen Einstellungen an."""
+        spec = self.selected_meteoroid()
+        if spec is None:
+            self.statusbar.showMessage("Bitte einen Meteoroiden auswählen.", 6000)
+            return
+        previous_index = self.selected_defense_index()
+        self.defense_actions.append({
+            "target": spec.name,
+            "frame": self.EingriffszeitpunktRegler.value(),
+            "angle": self.ImpulsrichtungRegler.value(),
+            "impulse": self.selected_impulse(),
+            "method": self.ImpulsstaerkeAuswahl.currentIndex(),
+            "own_strength": self.EigeneImpulsstaerke.value(),
+            "saved": False,
+        })
+        index = len(self.defense_actions) - 1
+        self.refresh_defense_queue(index)
+        if not self.save_selected_defense():
+            # Ungültige Anfangswerte erzeugen keinen zusätzlichen Listeneintrag.
+            if index < len(self.defense_actions) and not self.defense_actions[index].get("saved", True):
+                self.defense_actions.pop(index)
+            self.refresh_defense_queue(previous_index if previous_index is not None else -1)
+
+    def show_selected_defense(self, *_):
+        """Lädt die ausgewählte Abwehr in die vorhandenen Eingabefelder."""
+        index = self.selected_defense_index()
+        self.AbwehrEntfernen.setEnabled(index is not None)
+        if index is None:
+            return
+        self.stop_playback()
+        action = self.defense_actions[index]
+        for row, spec in enumerate(self.meteoroids):
+            if spec.name == action["target"]:
+                self.quietly_set(self.listWidget, "setCurrentRow", row)
+                self.show_selected_meteoroid()
+                break
+        self.quietly_set(self.ImpulsstaerkeAuswahl, "setCurrentIndex",
+                         action.get("method", 3))
+        self.quietly_set(self.EigeneImpulsstaerke, "setValue",
+                         action.get("own_strength", round(action["impulse"] / 1e11)))
+        self.quietly_set(self.ImpulsrichtungRegler, "setValue", action["angle"])
+        self.quietly_set(self.EingriffszeitpunktRegler, "setValue", action["frame"])
+        self.update_impulse_text()
+        self.update_angle_text()
+        self.update_time_text()
 
     def remove_defense(self):
         """Entfernt die markierte Aktion aus der Abwehrliste.
@@ -684,8 +763,9 @@ class SimulationWindow(QtWidgets.QMainWindow):
         if index is None or not 0 <= index < len(self.defense_actions):
             return
         self.defense_actions.pop(index)
-        self.refresh_defense_queue()
+        self.refresh_defense_queue(min(index, len(self.defense_actions) - 1))
         self.calculate_combined(preview_frame=self.EingriffszeitpunktRegler.value())
+        self.show_selected_defense()
 
     def clear_defenses(self):
         """Setzt nur die Abwehraktionen zurück, nicht die Meteoroiden.
@@ -735,16 +815,17 @@ class SimulationWindow(QtWidgets.QMainWindow):
             Jeder vorgemerkte Impuls wird in derselben Simulation angewandt.
             Eine bereits eingetretene Kollision kann spaetere Impulse verhindern.
         """
+        self.defense_rebuild_timer.stop()
         self.stop_playback()
         if self.baseline_positions is None:
             return
         try:
             bodies = self.create_bodies()
-            if self.defense_actions:
+            if self.saved_defenses():
                 trajectory = simulate_trajectory(
                     bodies, N, dt,
                     defense_actions=[dict(a, angle=(270 - a["angle"]) % 360)
-                                     for a in self.defense_actions],
+                                     for a in self.saved_defenses()],
                     stop_on_impact=self.stop_on_impact,
                 )
             else:
@@ -764,10 +845,10 @@ class SimulationWindow(QtWidgets.QMainWindow):
             trajectory, CLOSEUP_DISTANCE, dt, IMPACT_AFTERGLOW_SECONDS
         )
         self.mode_text = (
-            f"Mit {len(self.defense_actions)} Abwehraktion(en)"
-            if self.defense_actions else "Ohne Abwehr"
+            f"Mit {len(self.saved_defenses())} Abwehraktion(en)"
+            if self.saved_defenses() else "Ohne Abwehr"
         )
-        self.playback_restart_requested = bool(self.defense_actions)
+        self.playback_restart_requested = bool(self.saved_defenses())
         # setMaximum kann bei kürzerer Bahn valueChanged auslösen.
         # Währenddessen gehören die alten Linien noch zum vorherigen Verlauf.
         # Daher erst nach prepare_plot ein neues Vorschaubild zeichnen.
@@ -779,7 +860,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.prepare_plot()
         if preview_frame is not None:
             self.draw_frame(min(int(preview_frame), self.display_end_frame))
-        self.show_status_for_trajectory("Abwehrplan" if self.defense_actions else "Ausgangsversuch")
+        self.show_status_for_trajectory("Abwehrplan" if self.saved_defenses() else "Ausgangsversuch")
 
     def prepare_plot(self):
         """Erstellt Linien, Referenzbahnen, Impulsmarker und Richtungspfeil.
@@ -820,7 +901,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
             self.impact_markers.append((event, point))
 
         # Gestrichelte ursprüngliche Bahnen aller verteidigten Meteoroiden.
-        defended_names = {action["target"] for action in self.defense_actions}
+        defended_names = {action["target"] for action in self.saved_defenses()}
         for i, body in enumerate(self.bodies):
             if body.name not in defended_names:
                 continue
@@ -832,7 +913,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
             )
 
         # Jeder gespeicherte und erreichte Impuls bekommt einen Stern.
-        for action in self.defense_actions:
+        for action in self.saved_defenses():
             frame = action["frame"]
             index = self.index_for_target(action["target"])
             if index is not None and frame < self.display_end_frame and not self.trajectory.absorbed_at(index, frame):
@@ -889,7 +970,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         if self.playing:
             # In der Animation kurze Zeit nach einem ausgeführten Impuls.
             recent = [
-                a for a in self.defense_actions
+                a for a in self.saved_defenses()
                 if a["frame"] <= frame < a["frame"] + 24
                 and a["frame"] < self.display_end_frame
             ]
@@ -1256,6 +1337,8 @@ class SimulationWindow(QtWidgets.QMainWindow):
         if self.rebuild_timer.isActive():
             self.rebuild_timer.stop()
             self.calculate_baseline()
+        if self.defense_rebuild_timer.isActive():
+            self.recalculate_defenses()
         if self.positions is None:
             return
         if self.playback_restart_requested or self.frame >= self.display_end_frame - 1e-9:
@@ -1278,7 +1361,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         """Stoppt und springt zu Tag 0 des aktuellen Verlaufs zurück.
         """
         self.stop_playback()
-        self.playback_restart_requested = bool(self.defense_actions)
+        self.playback_restart_requested = bool(self.saved_defenses())
         self.draw_frame(0)
 
     def set_playback_speed(self, speed):
@@ -1410,23 +1493,35 @@ class SimulationWindow(QtWidgets.QMainWindow):
         )
         self.show_preview_time()
 
-    def run_defense(self):
-        """Merkt einen Impuls vor; Play zeigt danach ALLE Impulse zusammen.
+    def recalculate_defenses(self):
+        """Berechnet die Bahn nach einer kurzen Pause der Reglereingaben neu."""
+        self.defense_rebuild_timer.stop()
+        self.calculate_combined(preview_frame=self.EingriffszeitpunktRegler.value())
 
-        Notes:
-            Legt nur eine Aktion in der Warteschlange ab; Play spielt den
-            dadurch neu berechneten Verlauf ab.
-        """
-        spec = self.selected_meteoroid()
+    def save_selected_defense(self, *_):
+        """Übernimmt Reglereingaben direkt in die ausgewählte Abwehr."""
+        index = self.selected_defense_index()
+        if index is None:
+            return False
+        # Die Abwehr bleibt ihrem Ziel zugeordnet, auch wenn links gerade ein
+        # anderer Meteoroid zum Bearbeiten ausgewählt wurde.
+        target = self.defense_actions[index]["target"]
+        spec = next((body for body in self.meteoroids if body.name == target), None)
         if spec is None:
-            self.statusbar.showMessage("Bitte einen Meteoroiden auswählen.", 6000)
-            return
+            return False
         if self.rebuild_timer.isActive():
             self.rebuild_timer.stop()
             self.calculate_baseline()
+        index = self.selected_defense_index()
+        if index is None:
+            self.statusbar.showMessage(
+                "Die Abwehr wurde durch geänderte Startwerte entfernt. Bitte neu hinzufügen.",
+                6000,
+            )
+            return False
         if self.positions is None:
             self.statusbar.showMessage("Keine gültige Simulation.", 8000)
-            return
+            return False
 
         self.stop_playback()
         frame = self.EingriffszeitpunktRegler.value()
@@ -1435,26 +1530,32 @@ class SimulationWindow(QtWidgets.QMainWindow):
                 "Der Impuls liegt bei/nach der ersten Kollision. "
                 "Bitte früher eingreifen.", 9000,
             )
-            return
+            return False
         angle = self.ImpulsrichtungRegler.value()
         impulse = self.selected_impulse()
-        if impulse <= 0:
-            self.statusbar.showMessage("Bitte eine positive Impulsstärke einstellen.", 5000)
-            return
+        if impulse < 0:
+            self.statusbar.showMessage("Bitte eine nichtnegative Impulsstärke einstellen.", 5000)
+            return False
         action = {
             "target": spec.name,
             "frame": frame,
             "angle": angle,
             "impulse": impulse,
         }
-        self.defense_actions.append(action)
-        self.refresh_defense_queue()
-        self.calculate_combined(preview_frame=frame)
+        action.update({
+            "method": self.ImpulsstaerkeAuswahl.currentIndex(),
+            "own_strength": self.EigeneImpulsstaerke.value(),
+            "saved": True,
+        })
+        self.defense_actions[index] = action
+        self.refresh_defense_queue(index)
+        self.defense_rebuild_timer.start(180)
         self.playback_restart_requested = True
         self.statusbar.showMessage(
-            f"Abwehr {len(self.defense_actions)} gespeichert: "
+            f"Abwehr gespeichert: "
             f"{spec.name}, Tag {frame*dt/86400:.2f}, "
             f"{angle}°, Δv={impulse/spec.mass_kg:.3g} m/s. "
             "Play führt alle vorgemerkten Abwehren vor.",
             0,
         )
+        return True

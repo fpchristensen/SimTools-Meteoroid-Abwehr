@@ -456,7 +456,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         if spec is None or spec.profile != "Eigener Meteoroid":
             return
         speed = np.linalg.norm(spec.velocity)
-        rad = np.radians(angle)
+        rad = np.radians((270 - angle) % 360)
         self.drop_target_defenses(spec.name)
         spec.velocity = speed * np.array([np.cos(rad), np.sin(rad)])
         self.update_velocity_text()
@@ -869,7 +869,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         width = self.ax.get_xlim()[1] - self.ax.get_xlim()[0]
         height = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
         size = min(width, height) * 0.09
-        rad = np.radians(angle)
+        rad = np.radians((270 - angle) % 360)
         self.preview_arrow.set_positions(
             (x, y), (x + size * np.cos(rad), y + size * np.sin(rad))
         )

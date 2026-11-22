@@ -124,7 +124,7 @@ def deflect_meteorite(meteorite, impulse, angle):
     if meteorite.mass <= 0:
         raise ValueError("Die Masse des Meteoroiden muss positiv sein.")
 
-    angle_rad = np.radians(angle)
+    angle_rad = np.radians((270 - angle) % 360)
     impulse_vector = impulse * np.array([
         np.cos(angle_rad), np.sin(angle_rad)
     ])

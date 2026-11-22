@@ -45,6 +45,24 @@
           <widget class="QListWidget" name="listWidget"/>
          </item>
          <item>
+          <layout class="QHBoxLayout" name="meteoroidButtonLayout">
+           <item>
+            <widget class="QPushButton" name="MeteoroidEntfernen">
+             <property name="text">
+              <string>Meteoroid entfernen</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="MeteoroidHinzufuegen">
+             <property name="text">
+              <string>Meteoroid hinzufügen</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
           <spacer name="meteoroidenListeAbstand">
            <property name="orientation">
             <enum>Qt::Orientation::Vertical</enum>
@@ -119,19 +137,6 @@
          </item>
          <item>
           <spacer name="verticalSpacer_14">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_5">
            <property name="orientation">
             <enum>Qt::Orientation::Vertical</enum>
            </property>
@@ -282,37 +287,6 @@
            </property>
           </widget>
          </item>
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="meteoroidButtonLayout">
-           <item>
-            <widget class="QPushButton" name="MeteoroidEntfernen">
-             <property name="text">
-              <string>Meteoroid entfernen</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="MeteoroidHinzufuegen">
-             <property name="text">
-              <string>Meteoroid hinzufügen</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
         </layout>
        </item>
       </layout>
@@ -432,10 +406,21 @@
           </item>
           <item>
            <widget class="QPushButton" name="ImpactStopButton">
-            <property name="sizePolicy"><sizepolicy hsizetype="Fixed" vsizetype="Fixed"><horstretch>0</horstretch><verstretch>0</verstretch></sizepolicy></property>
-            <property name="text"><string>Abbruch bei Aufschlag: An</string></property>
-            <property name="checkable"><bool>true</bool></property>
-            <property name="checked"><bool>true</bool></property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Abbruch bei Aufschlag: An</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
@@ -521,10 +506,21 @@
           </item>
           <item>
            <widget class="QPushButton" name="CloseupButton">
-            <property name="sizePolicy"><sizepolicy hsizetype="Fixed" vsizetype="Fixed"><horstretch>0</horstretch><verstretch>0</verstretch></sizepolicy></property>
-            <property name="text"><string>Close-up: An</string></property>
-            <property name="checkable"><bool>true</bool></property>
-            <property name="checked"><bool>true</bool></property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Close-up: An</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
@@ -566,6 +562,44 @@
          <property name="spacing">
           <number>5</number>
          </property>
+         <item>
+          <widget class="QListWidget" name="GeplanteAbwehren">
+           <property name="toolTip">
+            <string>Alle vorgemerkten Impulse (Tag | Meteoroid | Winkel | Stärke)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="abwehrQueueButtons">
+           <item>
+            <widget class="QPushButton" name="AbwehrEntfernen">
+             <property name="text">
+              <string>Abwehr entfernen</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="AbwehrHinzufuegen">
+             <property name="text">
+              <string>Abwehr hinzufügen</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_12">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
          <item>
           <widget class="QLabel" name="Impulsstaerke">
            <property name="text">
@@ -670,71 +704,6 @@
             <enum>Qt::Orientation::Horizontal</enum>
            </property>
           </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_13">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="AbwehrDurchfuehrung">
-           <property name="text">
-            <string>Abwehr durchführen</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_12">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="GeplanteAbwehrenLabel">
-           <property name="text">
-            <string>Geplante Abwehren (0) – Play zeigt alle</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QListWidget" name="GeplanteAbwehren">
-           <property name="toolTip">
-            <string>Alle vorgemerkten Impulse (Tag | Meteoroid | Winkel | Stärke)</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="abwehrQueueButtons">
-           <item>
-            <widget class="QPushButton" name="AbwehrEntfernen">
-             <property name="text">
-              <string>Markierte entfernen</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="AlleAbwehrenLoeschen">
-             <property name="text">
-              <string>Alle löschen</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </item>
         </layout>
        </item>
