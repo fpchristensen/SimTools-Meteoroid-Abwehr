@@ -18,7 +18,7 @@ TEST_MODULES = (
 def run_tests():
     """Führt die beiden enthaltenen, unabhängigen Physiktest-Dateien aus.
 
-    Die Testmodule prüfen die Nahansicht, den Meteoroidenkatalog, adaptive
+    Die Testmodule prüfen die Nahansicht, den Asteroidenkatalog, adaptive
     Zeitschritte, die beiden Kollisionsmodi und die Impulserhaltung. Ihre ``main()``-Funktionen verwenden ``assert``
     und verursachen bei einem Fehler einen fehlschlagenden Programmstart.
     Die Tests importieren bewusst keine Qt-Bibliotheken.

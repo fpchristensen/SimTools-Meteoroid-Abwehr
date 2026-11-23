@@ -22,23 +22,23 @@ radius_Sonne = 6.9634e8
 m_Erde = 5.972e24
 radius_Erde = 6.371e6
 
-m_Meteorid1 = 1.0e10
-radius_Meteorid1 = 70
-r_Meteorid1 = [-1.5e11, 8.0e10]
-v_Meteorid1 = [14812.0, 22581.7]
+m_Asteroid1 = 1.0e10
+radius_Asteroid1 = 70
+r_Asteroid1 = [-1.5e11, 8.0e10]
+v_Asteroid1 = [14812.0, 22581.7]
 
 # Der zweite Meteoroid ist im Modell derzeit optional.
-m_Meteorid2 = 1.0e10
-radius_Meteorid2 = 100
-r_Meteorid2 = [1.5711168e11, 0.0]
-v_Meteorid2 = [-5000.0, 30195.6]
+m_Asteroid2 = 1.0e10
+radius_Asteroid2 = 100
+r_Asteroid2 = [1.5711168e11, 0.0]
+v_Asteroid2 = [-5000.0, 30195.6]
 
 T = 365.25 * 24 * 60 * 60
 N = int(365.25 * 24)
 dt = T / N  # 3600 s pro Schritt
 
 # Demonstrationswerte, KEINE realistischen Missions- oder Waffenleistungen.
-# Bei alten Werten (< 1e11 N·s) war Delta-v gerade bei schweren Meteoroiden
+# Bei alten Werten (< 1e11 N·s) war Delta-v gerade bei schweren Asteroiden
 # kaum sichtbar. Die neuen Abstufungen zeigen den Masse-Effekt deutlicher.
 # Wiedergabefaktoren der Qt-Animation (nur Anzeige, dt bleibt konstant).
 PLAYBACK_SPEEDS = (0.5, 1.0, 1.5, 2.0, 4.0)
@@ -51,16 +51,16 @@ ABWEHR_METHODEN = {
 
 
 # =============================================================================
-# Meteoroiden-Katalog: 20 geprüfte Beispielbahnen (10 leicht, 10 schwer)
+# Asteroiden-Katalog: 20 geprüfte Beispielbahnen (10 leicht, 10 schwer)
 # =============================================================================
 # Jede Bahn wurde einzeln für Sonne + Erde + Meteoroid im Euler-Cromer-Modell
 # mit dt=3600 s so gewählt, dass sie ohne Abwehr die Erde trifft.
-# Bei mehreren Meteoroiden kann die erste Kollision die Simulation beenden.
+# Bei mehreren Asteroiden kann die erste Kollision die Simulation beenden.
 # Alle Größen sind SI-Einheiten; target_impact_day bezeichnet den Referenztag.
 # Diese Daten sind direkt in values.py enthalten – eine JSON-Datei ist
 # nicht mehr nötig.
 
-METEOROIDEN_KATALOG = [
+ASTEROIDEN_KATALOG = [
     {
         'id': 'leicht_01',
         'name': 'Leicht 01',

@@ -14,12 +14,12 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Circle, FancyArrowPatch
 
 from classes_functions import (
-    MeteoroidSettings, catalog_settings, profiles,
+    AsteroidSettings, catalog_settings, profiles,
     simulate_trajectory, create_bodies as create_simulation_bodies,
     trajectory_windows, trajectory_next_frame,
 )
 from values import (
-    N, dt, r_Meteorid1, v_Meteorid1, ABWEHR_METHODEN, PLAYBACK_SPEEDS,
+    N, dt, r_Asteroid1, v_Asteroid1, ABWEHR_METHODEN, PLAYBACK_SPEEDS,
     CLOSEUP_DISTANCE, CLOSEUP_MAX_FRAME_STEP, CLOSEUP_DISTANCE_FRACTION,
     ANIMATION_INTERVAL_MS, IMPACT_AFTERGLOW_SECONDS,
 )
@@ -28,7 +28,7 @@ from values import (
 UI_DATEI = Path(__file__).with_name("mainwindow.ui")
 
 # Variante zum Kollisionsszenario: gleicher Startort, anderes v_y.
-VORBEIFLUG_V = [v_Meteorid1[0], -v_Meteorid1[1]]
+VORBEIFLUG_V = [v_Asteroid1[0], -v_Asteroid1[1]]
 
 
 class SimulationWindow(QtWidgets.QMainWindow):
@@ -49,14 +49,14 @@ class SimulationWindow(QtWidgets.QMainWindow):
         """
         super().__init__()
         uic.loadUi(str(UI_DATEI), self)
-        self.setWindowTitle("SimTools – Meteoroidenabwehr")
+        self.setWindowTitle("SimTools – Asteroidenabwehr")
         self.resize(1360, 850)
 
         # Das bisherige Beispiel an Tag 80 ist im neuen Katalog Leicht 03.
-        self.meteoroids = [catalog_settings("leicht_03", "Meteoroid 1")]
+        self.asteroids = [catalog_settings("leicht_03", "Asteroid 1")]
         # Laufende Nummer statt Listenlänge: keine doppelten Standardnamen
         # nach dem Löschen und erneuten Hinzufügen.
-        self.next_meteoroid_number = 2
+        self.next_asteroid_number = 2
         self.positions = None
         self.baseline_positions = None
         self.trajectory = None
@@ -126,9 +126,9 @@ class SimulationWindow(QtWidgets.QMainWindow):
 
         self.setup_widgets()
         self.connect_signals()
-        self.listWidget.addItem("Meteoroid 1")
+        self.listWidget.addItem("Asteroid 1")
         self.listWidget.setCurrentRow(0)
-        self.show_selected_meteoroid()
+        self.show_selected_asteroid()
         self.calculate_baseline()
 
     def setup_widgets(self):
@@ -175,13 +175,13 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.set_playback_speed(1.0)
 
         self.ErdeFolgenButton.setCheckable(True)
-        self.MeteoroidFolgenButton.setCheckable(True)
+        self.AsteroidFolgenButton.setCheckable(True)
         self.EigeneImpulsstaerke.setEnabled(False)
         self.update_impulse_text()
         self.update_time_text()
-        self.MeteoroidNameEingabe.setMaxLength(40)
-        self.MeteoroidNameEingabe.setPlaceholderText("Name des Meteoroiden")
-        self.MeteoroidEntfernen.setEnabled(True)
+        self.AsteroidNameEingabe.setMaxLength(40)
+        self.AsteroidNameEingabe.setPlaceholderText("Name des Asteroiden")
+        self.AsteroidEntfernen.setEnabled(True)
         self.GeplanteAbwehren.setSelectionMode(
             QtWidgets.QAbstractItemView.SelectionMode.SingleSelection
         )
@@ -194,19 +194,19 @@ class SimulationWindow(QtWidgets.QMainWindow):
         """Verbindet alle Steuerelemente der .ui-Datei mit Python-Funktionen.
         """
         # Linke Seite: Meteoroiden konfigurieren.
-        self.listWidget.currentRowChanged.connect(self.show_selected_meteoroid)
+        self.listWidget.currentRowChanged.connect(self.show_selected_asteroid)
         # Enter übernimmt den Namen. Beim einfachen Wechseln der Auswahl
         # wird noch nicht bestätigter Text wieder durch den echten Namen ersetzt.
-        self.MeteoroidNameEingabe.returnPressed.connect(self.rename_meteoroid)
+        self.AsteroidNameEingabe.returnPressed.connect(self.rename_asteroid)
         self.SzenarioAuswahl.currentTextChanged.connect(self.change_scenario)
-        self.MeteoroidenAuswahl.currentTextChanged.connect(self.change_profile)
+        self.AsteroidenAuswahl.currentTextChanged.connect(self.change_profile)
         self.KatalogAuswahl.currentIndexChanged.connect(self.change_catalog)
         self.GroesseEingabe.valueChanged.connect(self.change_diameter)
         self.GewichtEingabe.valueChanged.connect(self.change_mass)
         self.GeschwindigkeitsRichtung.valueChanged.connect(self.change_direction)
         self.GeschwindigkeitRegler.valueChanged.connect(self.change_speed)
-        self.MeteoroidHinzufuegen.clicked.connect(self.add_meteoroid)
-        self.MeteoroidEntfernen.clicked.connect(self.remove_meteoroid)
+        self.AsteroidHinzufuegen.clicked.connect(self.add_asteroid)
+        self.AsteroidEntfernen.clicked.connect(self.remove_asteroid)
 
         # Mitte: Simulation abspielen/pausieren und Kamera umstellen.
         self.PlayButton.clicked.connect(self.toggle_play)
@@ -217,8 +217,8 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.ErdeFolgenButton.clicked.connect(
             lambda: self.toggle_follow("Erde")
         )
-        self.MeteoroidFolgenButton.clicked.connect(
-            lambda: self.toggle_follow("Meteoroid")
+        self.AsteroidFolgenButton.clicked.connect(
+            lambda: self.toggle_follow("Asteroid")
         )
 
         # Rechte Seite: Abwehr auswählen und einmaligen Impuls anwenden.
@@ -242,17 +242,16 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.EingriffszeitpunktRegler.valueChanged.connect(self.save_selected_defense)
         self.AbwehrEntfernen.clicked.connect(self.remove_defense)
         self.AbwehrHinzufuegen.clicked.connect(self.add_defense)
-        self.GeplanteAbwehren.currentItemChanged.connect(self.show_selected_defense)
 
-    def selected_meteoroid(self):
-        """Liefert den in der Liste markierten Meteoroiden oder None.
+    def selected_asteroid(self):
+        """Liefert den in der Liste markierten Asteroiden oder None.
 
         Returns:
-            MeteoroidSettings | None: Markierter Meteoroid oder None bei leerer Auswahl.
+            AsteroidSettings | None: Markierter Asteroid oder None bei leerer Auswahl.
         """
         index = self.listWidget.currentRow()
-        if 0 <= index < len(self.meteoroids):
-            return self.meteoroids[index]
+        if 0 <= index < len(self.asteroids):
+            return self.asteroids[index]
         return None
 
     @staticmethod
@@ -268,22 +267,22 @@ class SimulationWindow(QtWidgets.QMainWindow):
         getattr(widget, method)(value)
         widget.blockSignals(previous)
 
-    def show_selected_meteoroid(self, *_):
-        """Zeigt die gespeicherten Werte des markierten Meteoroiden links an.
+    def show_selected_asteroid(self, *_):
+        """Zeigt die gespeicherten Werte des markierten Asteroiden links an.
 
         Args:
             *_ (object): Nicht verwendete Qt-Signalargumente.
         """
-        spec = self.selected_meteoroid()
+        spec = self.selected_asteroid()
         has_selection = spec is not None
-        # Auch wenn alle Meteoroiden gelöscht sind, bleibt die GUI stabil.
-        for widget in (self.MeteoroidNameEingabe, self.SzenarioAuswahl,
-                       self.MeteoroidenAuswahl, self.MeteoroidFolgenButton):
+        # Auch wenn alle Asteroiden gelöscht sind, bleibt die GUI stabil.
+        for widget in (self.AsteroidNameEingabe, self.SzenarioAuswahl,
+                       self.AsteroidenAuswahl, self.AsteroidFolgenButton):
             widget.setEnabled(has_selection)
-        self.MeteoroidEntfernen.setEnabled(has_selection)
-        self.MeteoroidHinzufuegen.setEnabled(len(self.meteoroids) < 5)
+        self.AsteroidEntfernen.setEnabled(has_selection)
+        self.AsteroidHinzufuegen.setEnabled(len(self.asteroids) < 5)
         if spec is None:
-            self.quietly_set(self.MeteoroidNameEingabe, "setText", "")
+            self.quietly_set(self.AsteroidNameEingabe, "setText", "")
             self.KatalogAuswahl.setEnabled(False)
             self.KatalogAuswahl.clear()
             for widget in (self.GroesseEingabe, self.GewichtEingabe,
@@ -293,9 +292,9 @@ class SimulationWindow(QtWidgets.QMainWindow):
             self.Geschwindigkeitsstaerke.setText("Geschwindigkeitsstärke")
             self.update_impulse_text()
             return
-        self.quietly_set(self.MeteoroidNameEingabe, "setText", spec.name)
+        self.quietly_set(self.AsteroidNameEingabe, "setText", spec.name)
         self.quietly_set(self.SzenarioAuswahl, "setCurrentText", spec.scenario)
-        self.quietly_set(self.MeteoroidenAuswahl, "setCurrentText", spec.profile)
+        self.quietly_set(self.AsteroidenAuswahl, "setCurrentText", spec.profile)
         self.populate_catalog(spec)
         self.quietly_set(self.GroesseEingabe, "setValue", spec.diameter_m)
         self.quietly_set(self.GewichtEingabe, "setValue", spec.mass_kg / 1e10)
@@ -307,7 +306,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.quietly_set(
             self.GeschwindigkeitRegler, "setValue", speed_hundredths
         )
-        editable = spec.profile == "Eigener Meteoroid"
+        editable = spec.profile == "Eigener Asteroid"
         # Katalogbahnen sind absichtlich unveränderlich, damit sie
         # einzeln sicher mit der Erde kollidieren.
         self.SzenarioAuswahl.setEnabled(editable)
@@ -322,21 +321,21 @@ class SimulationWindow(QtWidgets.QMainWindow):
         # Zeigt beim Wechsel auf den zweiten Meteoroiden dessen Ort zur
         # gewählten Abwehrzeit, statt den vorigen weiter anzuzeigen.
         if (not self.playing and self.positions is not None
-                and self.positions.shape[1] == len(self.meteoroids) + 2):
+                and self.positions.shape[1] == len(self.asteroids) + 2):
             self.show_preview_time()
         # Beim Hinzufügen eines Körpers enthält der alte Verlauf noch weniger
         # Körper; erst nach der Neuberechnung wird erneut gezeichnet.
         if (self.positions is not None
-                and self.positions.shape[1] == len(self.meteoroids) + 2):
+                and self.positions.shape[1] == len(self.asteroids) + 2):
             self.draw_frame(self.frame)
 
     def populate_catalog(self, spec):
         """Befüllt die linke Auswahl mit 10 leichten oder schweren Bahnen.
 
         Args:
-            spec (MeteoroidSettings): Aktuell ausgewählte Meteoroidenkonfiguration.
+            spec (AsteroidSettings): Aktuell ausgewählte Asteroidenkonfiguration.
         """
-        own = spec.profile == "Eigener Meteoroid"
+        own = spec.profile == "Eigener Asteroid"
         group = "Schwer" if spec.profile == "Groß und Schwer" else "Leicht"
         self.KatalogLabel.setText(
             "Kollisionsbahn (einzeln geprüft)" if not own
@@ -356,35 +355,35 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.KatalogAuswahl.setEnabled(not own)
 
     def change_scenario(self, scenario):
-        """Wechselt nur bei eigenen Meteoroiden den Beispieldatensatz.
+        """Wechselt nur bei eigenen Asteroiden den Beispieldatensatz.
 
         Args:
             scenario (str): "Kollision" oder "Vorbeiflug" aus der Combobox.
         """
-        spec = self.selected_meteoroid()
-        if spec is None or spec.profile != "Eigener Meteoroid":
+        spec = self.selected_asteroid()
+        if spec is None or spec.profile != "Eigener Asteroid":
             return
         self.drop_target_defenses(spec.name)
         spec.scenario = scenario
-        spec.position = np.array(r_Meteorid1, dtype=float)
+        spec.position = np.array(r_Asteroid1, dtype=float)
         if scenario == "Kollision":
-            spec.velocity = np.array(v_Meteorid1, dtype=float)
+            spec.velocity = np.array(v_Asteroid1, dtype=float)
         else:
             spec.velocity = np.array(VORBEIFLUG_V, dtype=float)
-        self.show_selected_meteoroid()
+        self.show_selected_asteroid()
         self.queue_baseline()
 
     def change_profile(self, profile):
         """Wählt einen geprüften Katalogeintrag oder freie Einstellungen.
 
         Args:
-            profile (str): Vorlagenart oder "Eigener Meteoroid".
+            profile (str): Vorlagenart oder "Eigener Asteroid".
         """
-        spec = self.selected_meteoroid()
+        spec = self.selected_asteroid()
         if spec is None:
             return
         self.drop_target_defenses(spec.name)
-        if profile == "Eigener Meteoroid":
+        if profile == "Eigener Asteroid":
             # Bisherige Startwerte bleiben als editierbarer Ausgangspunkt.
             spec.profile = profile
             spec.catalog_id = None
@@ -393,15 +392,15 @@ class SimulationWindow(QtWidgets.QMainWindow):
             self.apply_catalog(spec, profiles(category)[0]["id"])
             # Vorbeugend statt eines alten, womöglich fast zu späten Zeitpunkts.
             self.EingriffszeitpunktRegler.setValue(20 * 24)
-        self.show_selected_meteoroid()
+        self.show_selected_asteroid()
         self.queue_baseline()
 
     @staticmethod
     def apply_catalog(spec, profile_id):
-        """Ersetzt einen Meteoroiden durch gespeicherte Anfangswerte.
+        """Ersetzt einen Asteroiden durch gespeicherte Anfangswerte.
 
         Args:
-            spec (MeteoroidSettings): Vorhandene, zu aktualisierende Konfiguration.
+            spec (AsteroidSettings): Vorhandene, zu aktualisierende Konfiguration.
             profile_id (str): ID des geprüften Katalogeintrags.
         """
         replacement = catalog_settings(profile_id, spec.name)
@@ -414,29 +413,29 @@ class SimulationWindow(QtWidgets.QMainWindow):
         spec.velocity = replacement.velocity
 
     def change_catalog(self, *_):
-        """Nimmt die 1–10 ausgewählte Bahn für den aktiven Meteoroiden.
+        """Nimmt die 1–10 ausgewählte Bahn für den aktiven Asteroiden.
 
         Args:
             *_ (object): Von Qt übergebene, nicht benötigte Signalargumente.
         """
-        spec = self.selected_meteoroid()
+        spec = self.selected_asteroid()
         profile_id = self.KatalogAuswahl.currentData()
         if spec is None or not profile_id:
             return
         self.drop_target_defenses(spec.name)
         self.apply_catalog(spec, profile_id)
         self.EingriffszeitpunktRegler.setValue(20 * 24)
-        self.show_selected_meteoroid()
+        self.show_selected_asteroid()
         self.queue_baseline()
 
     def change_diameter(self, diameter):
-        """Übernimmt den Durchmesser des selbst definierten Meteoroiden.
+        """Übernimmt den Durchmesser des selbst definierten Asteroiden.
 
         Args:
             diameter (float): Neuer Durchmesser in m.
         """
-        spec = self.selected_meteoroid()
-        if spec and spec.profile == "Eigener Meteoroid":
+        spec = self.selected_asteroid()
+        if spec and spec.profile == "Eigener Asteroid":
             self.drop_target_defenses(spec.name)
             spec.diameter_m = diameter
             self.queue_baseline()
@@ -447,8 +446,8 @@ class SimulationWindow(QtWidgets.QMainWindow):
         Args:
             mass_units (float): Masse in Einheiten von 10^10 kg.
         """
-        spec = self.selected_meteoroid()
-        if spec and spec.profile == "Eigener Meteoroid":
+        spec = self.selected_asteroid()
+        if spec and spec.profile == "Eigener Asteroid":
             self.drop_target_defenses(spec.name)
             spec.mass_kg = mass_units * 1.0e10
             self.queue_baseline()
@@ -456,7 +455,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
     def update_velocity_text(self):
         """Zeigt Richtung in Grad und Betrag in km/s an.
         """
-        spec = self.selected_meteoroid()
+        spec = self.selected_asteroid()
         if spec is None:
             return
         angle = (270 - np.degrees(np.arctan2(
@@ -476,8 +475,8 @@ class SimulationWindow(QtWidgets.QMainWindow):
         Args:
             angle (int): Reglerwinkel in Grad (0° unten, im Uhrzeigersinn).
         """
-        spec = self.selected_meteoroid()
-        if spec is None or spec.profile != "Eigener Meteoroid":
+        spec = self.selected_asteroid()
+        if spec is None or spec.profile != "Eigener Asteroid":
             return
         speed = np.linalg.norm(spec.velocity)
         rad = np.radians((270 - angle) % 360)
@@ -492,8 +491,8 @@ class SimulationWindow(QtWidgets.QMainWindow):
         Args:
             slider_value (int): Schieberwert; eine Einheit entspricht 10 m/s.
         """
-        spec = self.selected_meteoroid()
-        if spec is None or spec.profile != "Eigener Meteoroid":
+        spec = self.selected_asteroid()
+        if spec is None or spec.profile != "Eigener Asteroid":
             return
         angle = np.arctan2(spec.velocity[1], spec.velocity[0])
         speed = slider_value * 10.0  # 1 Schieberpunkt = 10 m/s
@@ -502,12 +501,12 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.update_velocity_text()
         self.queue_baseline()
 
-    def check_meteoroid_name(self, text, exclude=None):
+    def check_asteroid_name(self, text, exclude=None):
         """Prüft Namen auf Leertext, Doppelungen und reservierte Namen.
 
         Args:
             text (str): Geplanter Name.
-            exclude (MeteoroidSettings | None): Beim Umbenennen ignorierter Körper.
+            exclude (AsteroidSettings | None): Beim Umbenennen ignorierter Körper.
 
         Returns:
             tuple[str, str | None]: Bereinigter Name und Fehlermeldung.
@@ -520,22 +519,22 @@ class SimulationWindow(QtWidgets.QMainWindow):
         if name.casefold() in {"sonne", "erde"}:
             return name, "'Sonne' und 'Erde' sind bereits vergeben."
         if any(a is not exclude and a.name.casefold() == name.casefold()
-               for a in self.meteoroids):
+               for a in self.asteroids):
             return name, f"Der Name '{name}' wird bereits verwendet."
         return name, None
 
-    def rename_meteoroid(self):
+    def rename_asteroid(self):
         """Übernimmt den links eingetragenen Namen per Enter.
         """
-        spec = self.selected_meteoroid()
+        spec = self.selected_asteroid()
         if spec is None:
             return
-        name, error = self.check_meteoroid_name(
-            self.MeteoroidNameEingabe.text(), exclude=spec
+        name, error = self.check_asteroid_name(
+            self.AsteroidNameEingabe.text(), exclude=spec
         )
         if error:
             self.statusbar.showMessage(error, 6000)
-            self.quietly_set(self.MeteoroidNameEingabe, "setText", spec.name)
+            self.quietly_set(self.AsteroidNameEingabe, "setText", spec.name)
             return
         if name == spec.name:
             return
@@ -545,38 +544,38 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.refresh_defense_queue()
         spec.name = name
         self.listWidget.currentItem().setText(name)
-        self.quietly_set(self.MeteoroidNameEingabe, "setText", name)
+        self.quietly_set(self.AsteroidNameEingabe, "setText", name)
         self.queue_baseline()
 
-    def add_meteoroid(self):
-        """Fragt den Namen ab und fügt einen Meteoroiden hinzu.
+    def add_asteroid(self):
+        """Fragt den Namen ab und fügt einen Asteroiden hinzu.
         """
-        if len(self.meteoroids) >= 5:
-            self.statusbar.showMessage("Maximal fünf Meteoroiden möglich.", 6000)
+        if len(self.asteroids) >= 5:
+            self.statusbar.showMessage("Maximal fünf Asteroiden möglich.", 6000)
             return
 
-        default_name = f"Meteoroid {self.next_meteoroid_number}"
+        default_name = f"Asteroid {self.next_asteroid_number}"
         while True:
             # QInputDialog.getText enthält bereits ein bearbeitbares Namensfeld.
             chosen, ok = QtWidgets.QInputDialog.getText(
-                self, "Meteoroid hinzufügen", "Name des neuen Meteoroiden:",
+                self, "Asteroid hinzufügen", "Name des neuen Asteroiden:",
                 QtWidgets.QLineEdit.EchoMode.Normal, default_name,
             )
-            if not ok:  # 'Abbrechen': kein Meteoroid wird erstellt.
+            if not ok:  # 'Abbrechen': kein Asteroid wird erstellt.
                 return
-            name, error = self.check_meteoroid_name(chosen)
+            name, error = self.check_asteroid_name(chosen)
             if not error:
                 break
             QtWidgets.QMessageBox.warning(self, "Ungültiger Name", error)
             default_name = chosen
 
-        base = (self.selected_meteoroid() or self.meteoroids[0]) if self.meteoroids else None
-        if base is not None and base.profile != "Eigener Meteoroid":
-            # Neue Katalog-Meteoroiden erhalten möglichst eine andere
+        base = (self.selected_asteroid() or self.asteroids[0]) if self.asteroids else None
+        if base is not None and base.profile != "Eigener Asteroid":
+            # Neue Katalog-Asteroiden erhalten möglichst eine andere
             # validierte Bahn statt denselben Startpunkt zu überlagern.
             category = "Leicht" if base.profile == "Klein und Leicht" else "Schwer"
             choices = profiles(category)
-            used = {a.catalog_id for a in self.meteoroids}
+            used = {a.catalog_id for a in self.asteroids}
             choice = next((e for e in choices if e["id"] not in used), None)
             if choice is None:
                 self.statusbar.showMessage(
@@ -585,50 +584,50 @@ class SimulationWindow(QtWidgets.QMainWindow):
                 return
             new = catalog_settings(choice["id"], name)
         else:
-            # Eigene Meteoroiden werden mit Abstand zur Vorlage kopiert;
+            # Eigene Asteroiden werden mit Abstand zur Vorlage kopiert;
             # diese frei editierbaren Startwerte haben KEINE Einschlaggarantie.
-            offset = np.array([-3.5e10, 2.5e10]) * self.next_meteoroid_number
-            new = MeteoroidSettings(
+            offset = np.array([-3.5e10, 2.5e10]) * self.next_asteroid_number
+            new = AsteroidSettings(
                 name=name,
                 scenario=base.scenario if base else "Vorbeiflug",
-                profile="Eigener Meteoroid",
+                profile="Eigener Asteroid",
                 diameter_m=base.diameter_m if base else 140,
                 mass_kg=base.mass_kg if base else 1e10,
-                position=(base.position.copy() if base else np.array(r_Meteorid1)) + offset,
+                position=(base.position.copy() if base else np.array(r_Asteroid1)) + offset,
                 velocity=base.velocity.copy() if base else np.array(VORBEIFLUG_V),
             )
-        self.next_meteoroid_number += 1
-        self.meteoroids.append(new)
+        self.next_asteroid_number += 1
+        self.asteroids.append(new)
         self.listWidget.addItem(new.name)
-        self.listWidget.setCurrentRow(len(self.meteoroids) - 1)
+        self.listWidget.setCurrentRow(len(self.asteroids) - 1)
         self.queue_baseline()
 
-    def remove_meteoroid(self):
-        """Entfernt den markierten Meteoroiden aus Liste und Simulation.
+    def remove_asteroid(self):
+        """Entfernt den markierten Asteroiden aus Liste und Simulation.
         """
         index = self.listWidget.currentRow()
-        if not 0 <= index < len(self.meteoroids):
-            self.statusbar.showMessage("Bitte zuerst einen Meteoroiden auswählen.")
+        if not 0 <= index < len(self.asteroids):
+            self.statusbar.showMessage("Bitte zuerst einen Asteroiden auswählen.")
             return
 
         self.rebuild_timer.stop()
         self.stop_playback()
-        removed = self.meteoroids.pop(index)
+        removed = self.asteroids.pop(index)
         self.drop_target_defenses(removed.name)
         # Liste kurz ohne currentRowChanged-Signale ändern; so entsteht
         # kein Zwischenbild mit alten Positionen und neuen Indizes.
         was_blocked = self.listWidget.blockSignals(True)
         self.listWidget.takeItem(index)
         self.listWidget.setCurrentRow(
-            min(index, len(self.meteoroids) - 1) if self.meteoroids else -1
+            min(index, len(self.asteroids) - 1) if self.asteroids else -1
         )
         self.listWidget.blockSignals(was_blocked)
 
-        if not self.meteoroids and self.follow_mode == "Meteoroid":
+        if not self.asteroids and self.follow_mode == "Asteroid":
             self.follow_mode = "Sonne"
-            self.MeteoroidFolgenButton.setChecked(False)
+            self.AsteroidFolgenButton.setChecked(False)
         self.positions = None  # Alter Verlauf darf nicht mehr angezeigt werden.
-        self.show_selected_meteoroid()
+        self.show_selected_asteroid()
         self.calculate_baseline()  # Mit den verbliebenen Körpern neu rechnen.
         self.statusbar.showMessage(f"'{removed.name}' wurde entfernt.", 6000)
 
@@ -638,13 +637,13 @@ class SimulationWindow(QtWidgets.QMainWindow):
         Returns:
             list[CelestialBody]: Neue Objekte für einen frischen Simulationslauf.
         """
-        return create_simulation_bodies(self.meteoroids)
+        return create_simulation_bodies(self.asteroids)
 
     def drop_target_defenses(self, target_name):
         """Änderungen an Startwerten machen alte Impulse dieses Ziels ungültig.
 
         Args:
-            target_name (str): Name des veränderten oder gelöschten Meteoroiden.
+            target_name (str): Name des veränderten oder gelöschten Asteroiden.
         """
         old_count = len(self.defense_actions)
         self.defense_actions = [
@@ -707,7 +706,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
 
     def add_defense(self):
         """Legt genau eine Abwehr mit den aktuellen Einstellungen an."""
-        spec = self.selected_meteoroid()
+        spec = self.selected_asteroid()
         if spec is None:
             self.statusbar.showMessage("Bitte einen Meteoroiden auswählen.", 6000)
             return
@@ -737,10 +736,10 @@ class SimulationWindow(QtWidgets.QMainWindow):
             return
         self.stop_playback()
         action = self.defense_actions[index]
-        for row, spec in enumerate(self.meteoroids):
+        for row, spec in enumerate(self.asteroids):
             if spec.name == action["target"]:
                 self.quietly_set(self.listWidget, "setCurrentRow", row)
-                self.show_selected_meteoroid()
+                self.show_selected_asteroid()
                 break
         self.quietly_set(self.ImpulsstaerkeAuswahl, "setCurrentIndex",
                          action.get("method", 3))
@@ -768,7 +767,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.show_selected_defense()
 
     def clear_defenses(self):
-        """Setzt nur die Abwehraktionen zurück, nicht die Meteoroiden.
+        """Setzt nur die Abwehraktionen zurück, nicht die Asteroiden.
         """
         self.defense_actions.clear()
         self.refresh_defense_queue()
@@ -900,7 +899,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
             point.set_visible(False)
             self.impact_markers.append((event, point))
 
-        # Gestrichelte ursprüngliche Bahnen aller verteidigten Meteoroiden.
+        # Gestrichelte ursprüngliche Bahnen aller verteidigten Asteroiden.
         defended_names = {action["target"] for action in self.saved_defenses()}
         for i, body in enumerate(self.bodies):
             if body.name not in defended_names:
@@ -954,7 +953,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         )
 
     def update_preview_arrow(self, frame):
-        """Richtungspfeil am Meteoroiden: beim Einstellen oder bei Impulswirkung.
+        """Richtungspfeil am Asteroiden: beim Einstellen oder bei Impulswirkung.
 
         Args:
             frame (float): Aktuell angezeigter Simulationsschritt.
@@ -979,7 +978,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
                 target, angle = action["target"], action["angle"]
         elif frame == self.EingriffszeitpunktRegler.value():
             # Vor dem Vormerken zeigen wir den aktuell gewählten Impuls.
-            selected = self.selected_meteoroid()
+            selected = self.selected_asteroid()
             if selected is not None:
                 target = selected.name
                 angle = self.ImpulsrichtungRegler.value()
@@ -1013,11 +1012,11 @@ class SimulationWindow(QtWidgets.QMainWindow):
         ax.set_title("Nahansicht · Zeitlupe", fontsize=11)
         ax.set_facecolor("#f4f8ff")
         self.earth_circle = Circle((0, 0), 1, facecolor="royalblue", edgecolor="navy", alpha=0.30)
-        self.meteoroid_circle = Circle((0, 0), 1, facecolor="dimgray", edgecolor="black")
+        self.asteroid_circle = Circle((0, 0), 1, facecolor="dimgray", edgecolor="black")
         ax.add_patch(self.earth_circle)
-        ax.add_patch(self.meteoroid_circle)
+        ax.add_patch(self.asteroid_circle)
         self.earth_point, = ax.plot(0, 0, "o", color="royalblue", ms=3, zorder=4)
-        self.meteoroid_point, = ax.plot([], [], "+", color="black", ms=6, zorder=5)
+        self.asteroid_point, = ax.plot([], [], "+", color="black", ms=6, zorder=5)
         self.closeup_trail, = ax.plot([], [], color="dimgray", lw=1.2, zorder=2)
         self.closeup_info = ax.text(0.02, 0.98, "", transform=ax.transAxes,
                                     va="top", fontsize=8, zorder=9,
@@ -1033,9 +1032,9 @@ class SimulationWindow(QtWidgets.QMainWindow):
         comp.set_axis_off()
         comp.set_title("Größenvergleich\n(maßstabsgetreu)", fontsize=8)
         self.comparison_earth = Circle((0, 0), 1, facecolor="royalblue", edgecolor="navy", alpha=0.30)
-        self.comparison_meteoroid = Circle((0, 0), 1, facecolor="dimgray", edgecolor="black")
+        self.comparison_asteroid = Circle((0, 0), 1, facecolor="dimgray", edgecolor="black")
         comp.add_patch(self.comparison_earth)
-        comp.add_patch(self.comparison_meteoroid)
+        comp.add_patch(self.comparison_asteroid)
         self.comparison_point, = comp.plot([], [], "+", color="black", ms=5)
         self.comparison_info = comp.text(0.5, -0.03, "", transform=comp.transAxes,
                                          ha="center", va="top", fontsize=8)
@@ -1058,10 +1057,10 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.closeup_active = False
 
     def update_closeup(self, frame, current):
-        """Zeigt den nächsten Meteoroiden in einem erdzentrierten Koordinatensystem.
+        """Zeigt den nächsten Asteroiden in einem erdzentrierten Koordinatensystem.
 
         Kreise werden in km mit den echten Radien gezeichnet. Das Kreuz ist
-        nur eine Positionsmarkierung und kein vergrößerter Meteoroidenradius.
+        nur eine Positionsmarkierung und kein vergrößerter Asteroidenradius.
         """
         if not self.closeup_enabled or self.closeup_ax is None or not any(
             entry - 1e-9 <= frame <= exit_ + 1e-9
@@ -1093,27 +1092,27 @@ class SimulationWindow(QtWidgets.QMainWindow):
         else:
             self.hide_closeup()
             return
-        earth, meteor = self.bodies[1], self.bodies[index]
+        earth, asteroid = self.bodies[1], self.bodies[index]
         relative = (current[index] - current[1]) / 1000
         if event is not None:
             direction = event.contact / np.linalg.norm(event.contact)
-            relative = direction * (earth.radius + meteor.radius) / 1000
+            relative = direction * (earth.radius + asteroid.radius) / 1000
         distance = float(np.linalg.norm(relative))
-        earth_r, meteor_r = earth.radius / 1000, meteor.radius / 1000
-        gap = distance - earth_r - meteor_r
+        earth_r, asteroid_r = earth.radius / 1000, asteroid.radius / 1000
+        gap = distance - earth_r - asteroid_r
         self.earth_circle.set_radius(earth_r)
-        self.meteoroid_circle.set_radius(meteor_r)
-        self.meteoroid_circle.set_center(relative)
+        self.asteroid_circle.set_radius(asteroid_r)
+        self.asteroid_circle.set_center(relative)
         absorbed = event is not None and frame > event.frame + 1e-9
-        self.meteoroid_circle.set_visible(not absorbed)
-        self.meteoroid_point.set_visible(not absorbed)
-        self.meteoroid_point.set_data([relative[0]], [relative[1]])
+        self.asteroid_circle.set_visible(not absorbed)
+        self.asteroid_point.set_visible(not absorbed)
+        self.asteroid_point.set_data([relative[0]], [relative[1]])
         lower = self.trajectory.index(event.frame if event is not None else frame)
         start = self.trajectory.index(max(0, frame - 6))
         trail = (self.positions[start:lower + 1, index] - self.positions[start:lower + 1, 1]) / 1000
         trail = np.vstack((trail, relative))
         self.closeup_trail.set_data(trail[:, 0], trail[:, 1])
-        half_width = max(1.5 * earth_r, 1.2 * (distance + meteor_r))
+        half_width = max(1.5 * earth_r, 1.2 * (distance + asteroid_r))
         self.closeup_ax.set_xlim(-half_width, half_width)
         self.closeup_ax.set_ylim(-half_width, half_width)
         if event is not None:
@@ -1135,18 +1134,18 @@ class SimulationWindow(QtWidgets.QMainWindow):
             velocity = self.trajectory.velocities[lower, index] - self.trajectory.velocities[lower, 1]
             phase = "Anflug" if np.dot(relative, velocity) < 0 else "Vorbeiflug / Entfernung"
             info = f"Oberflächenabstand: {max(0.0, gap):,.1f} km"
-        self.closeup_info.set_text(f"{meteor.name} · {phase}\n{info}")
+        self.closeup_info.set_text(f"{asteroid.name} · {phase}\n{info}")
         self.comparison_earth.set_radius(earth_r)
         position = (1.7 * earth_r, 0)
-        self.comparison_meteoroid.set_center(position)
-        self.comparison_meteoroid.set_radius(meteor_r)
+        self.comparison_asteroid.set_center(position)
+        self.comparison_asteroid.set_radius(asteroid_r)
         self.comparison_point.set_data([position[0]], [position[1]])
         self.comparison_ax.set_xlim(-1.15 * earth_r, 2.1 * earth_r)
         self.comparison_ax.set_ylim(-1.15 * earth_r, 1.15 * earth_r)
         self.comparison_info.set_text(
             f"Erde: {2 * earth_r:,.0f} km Ø\n"
-            f"Meteoroid: {2 * meteor.radius:g} m Ø\n"
-            f"Erde ≈ {earth_r / meteor_r:,.0f}× größer (Ø)"
+            f"Asteroid: {2 * asteroid.radius:g} m Ø\n"
+            f"Erde ≈ {earth_r / asteroid_r:,.0f}× größer (Ø)"
         )
 
     def draw_frame(self, frame):
@@ -1206,7 +1205,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         current = self.trajectory.at(frame)
         if self.follow_mode == "Erde" and np.isfinite(current[1]).all():
             return current[1].copy(), 2e10
-        if self.follow_mode == "Meteoroid" and self.selected_meteoroid() is not None:
+        if self.follow_mode == "Asteroid" and self.selected_asteroid() is not None:
             index = self.listWidget.currentRow() + 2
             if index < self.positions.shape[1] and np.isfinite(current[index]).all():
                 return current[index].copy(), 2e10
@@ -1417,18 +1416,18 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.playback_restart_requested = True
 
     def toggle_follow(self, target):
-        """Schaltet Erd-/Meteoroidenverfolgung oder Sonnenansicht ein.
+        """Schaltet Erd-/Asteroidenverfolgung oder Sonnenansicht ein.
 
         Args:
-            target (str): "Erde" oder "Meteoroid"; erneutes Klicken wählt die Sonne.
+            target (str): "Erde" oder "Asteroid"; erneutes Klicken wählt die Sonne.
         """
-        if target == "Meteoroid" and self.selected_meteoroid() is None:
+        if target == "Asteroid" and self.selected_asteroid() is None:
             return
         self.follow_mode = "Sonne" if self.follow_mode == target else target
         # Follow zentriert auf den gewählten Körper, der Zoom bleibt bestehen.
         self.pan_offset[:] = 0.0
         self.ErdeFolgenButton.setChecked(self.follow_mode == "Erde")
-        self.MeteoroidFolgenButton.setChecked(self.follow_mode == "Meteoroid")
+        self.AsteroidFolgenButton.setChecked(self.follow_mode == "Asteroid")
         self.draw_frame(self.frame)
 
     def update_impulse_text(self, *_):
@@ -1441,14 +1440,14 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.EigeneImpulsstaerke.setEnabled(own)
         impulse = self.selected_impulse()
         self.Impulsstaerke.setText(f"Impulsstärke: {impulse:.2e} N·s")
-        spec = self.selected_meteoroid()
+        spec = self.selected_asteroid()
         if spec is not None and spec.mass_kg > 0:
             speed_change = impulse / spec.mass_kg
             self.ImpulswirkungLabel.setText(
                 f"Δv = J/m: {speed_change:.3g} m/s"
             )
         else:
-            self.ImpulswirkungLabel.setText("Δv: Meteoroid auswählen")
+            self.ImpulswirkungLabel.setText("Δv: Asteroid auswählen")
         if not self.playing:
             self.draw_frame(self.frame)
 
@@ -1506,7 +1505,7 @@ class SimulationWindow(QtWidgets.QMainWindow):
         # Die Abwehr bleibt ihrem Ziel zugeordnet, auch wenn links gerade ein
         # anderer Meteoroid zum Bearbeiten ausgewählt wurde.
         target = self.defense_actions[index]["target"]
-        spec = next((body for body in self.meteoroids if body.name == target), None)
+        spec = next((body for body in self.asteroids if body.name == target), None)
         if spec is None:
             return False
         if self.rebuild_timer.isActive():

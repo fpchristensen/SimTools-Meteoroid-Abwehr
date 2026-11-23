@@ -1,7 +1,7 @@
-"""Physikalisches Modell und Meteoroiden-Datenstrukturen.
+"""Physikalisches Modell und Asteroiden-Datenstrukturen.
 
 Hier liegen alle Klassen und allgemeinen Funktionen für die Simulation:
-Himmelskörper, Meteoroiden-Einstellungen, Gravitationsmodell, Kollisionen,
+Himmelskörper, Asteroiden-Einstellungen, Gravitationsmodell, Kollisionen,
 Impulse und Zugriff auf die Katalogdaten aus values.py.
 
 Dieses Modul benötigt KEIN PyQt6 und KEIN Matplotlib.
@@ -11,9 +11,9 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from values import (
-    G, METEOROIDEN_KATALOG,
+    G, ASTEROIDEN_KATALOG,
     a_Ellipse, e_Ellipse, m_Sonne, radius_Sonne, m_Erde, radius_Erde,
-    m_Meteorid1, radius_Meteorid1, r_Meteorid1, v_Meteorid1,
+    m_Asteroid1, radius_Asteroid1, r_Asteroid1, v_Asteroid1,
 )
 
 
@@ -104,11 +104,11 @@ def check_collision(bodies):
     return None
 
 
-def deflect_meteorite(meteorite, impulse, angle):
+def deflect_asteroid(asteroid, impulse, angle):
     """Einmaliger Impuls: Delta-v = J / m, Winkel 0° rechts, 90° oben.
 
     Args:
-        meteorite (CelestialBody): Meteoroid, dessen Geschwindigkeit geändert wird.
+        asteroid (CelestialBody): Asteroid, dessen Geschwindigkeit geändert wird.
         impulse (float): Betrag des Impulses in N s.
         angle (float): Richtung in Grad ab der positiven x-Achse, gegen den Uhrzeigersinn.
 
@@ -121,18 +121,18 @@ def deflect_meteorite(meteorite, impulse, angle):
     """
     if impulse < 0:
         raise ValueError("Der Impulsbetrag darf nicht negativ sein.")
-    if meteorite.mass <= 0:
-        raise ValueError("Die Masse des Meteoroiden muss positiv sein.")
+    if asteroid.mass <= 0:
+        raise ValueError("Die Masse des Asteroiden muss positiv sein.")
 
     angle_rad = np.radians(angle)
     impulse_vector = impulse * np.array([
         np.cos(angle_rad), np.sin(angle_rad)
     ])
-    meteorite.v += impulse_vector / meteorite.mass
+    asteroid.v += impulse_vector / asteroid.mass
 
 
 def simulate_system(bodies, N, dt,
-                    meteorite=None, impulse=0, time=0, angle=0,
+                    asteroid=None, impulse=0, time=0, angle=0,
                     defense_actions=None):
     """Historisches Stundenmodell mit beliebig vielen einmaligen Impulsen.
 
@@ -144,9 +144,9 @@ def simulate_system(bodies, N, dt,
             werden während der Berechnung direkt verändert.
         N (int): Maximale Anzahl der Zeitschritte.
         dt (float): Dauer eines Zeitschritts in Sekunden.
-        meteorite (CelestialBody | None): Zielkörper der älteren Einzelschritt-API.
-        impulse (float): Impulsbetrag in N·s für ``meteorite``.
-        time (float): Eingriffszeitpunkt in Sekunden für ``meteorite``.
+        asteroid (CelestialBody | None): Zielkörper der älteren Einzelschritt-API.
+        impulse (float): Impulsbetrag in N·s für ``asteroid``.
+        time (float): Eingriffszeitpunkt in Sekunden für ``asteroid``.
         angle (float): Impulsrichtung in Grad ab der positiven x-Achse.
         defense_actions (list[dict] | None): Liste mit den Einträgen ``frame``
             (ganzer Simulationsschritt), ``target`` (Körpername), ``impulse``
@@ -172,20 +172,20 @@ def simulate_system(bodies, N, dt,
         raise ValueError("dt muss positiv und N darf nicht negativ sein.")
     if time < 0:
         raise ValueError("Der Ablenkungszeitpunkt darf nicht negativ sein.")
-    if meteorite is not None and meteorite not in bodies:
-        raise ValueError("Der abgelenkte Meteoroid muss in bodies stehen.")
+    if asteroid is not None and asteroid not in bodies:
+        raise ValueError("Der abgelenkte Asteroid muss in bodies stehen.")
 
     # Eine Aktion erhält ihre eigene Referenz auf den tatsächlich simulierten
-    # Körper, damit verschiedene Meteoroiden im selben Lauf abgelenkt werden.
+    # Körper, damit verschiedene Asteroiden im selben Lauf abgelenkt werden.
     names = {body.name: body for body in bodies}
     if len(names) != len(bodies):
         raise ValueError("Alle Körper benötigen eindeutige Namen.")
     actions_by_frame = {}
     entries = list(defense_actions or [])
-    if meteorite is not None:
+    if asteroid is not None:
         entries.append({
             "frame": int(np.ceil(time / dt)),
-            "target": meteorite.name,
+            "target": asteroid.name,
             "impulse": impulse,
             "angle": angle,
         })
@@ -216,7 +216,7 @@ def simulate_system(bodies, N, dt,
         )
 
     for target, value, direction in actions_by_frame.get(0, []):
-        deflect_meteorite(target, value, direction)
+        deflect_asteroid(target, value, direction)
 
     r_list = [[body.r.copy() for body in bodies]]
     v_list = [[body.v.copy() for body in bodies]]
@@ -230,7 +230,7 @@ def simulate_system(bodies, N, dt,
         collision = check_collision(bodies)
         if collision is None:
             for target, value, direction in actions_by_frame.get(n + 1, []):
-                deflect_meteorite(target, value, direction)
+                deflect_asteroid(target, value, direction)
 
         r_list.append([body.r.copy() for body in bodies])
         v_list.append([body.v.copy() for body in bodies])
@@ -241,7 +241,7 @@ def simulate_system(bodies, N, dt,
     return np.array(r_list), np.array(v_list), collision
 
 
-def start_defense(frame, angle, impulse, meteorite_name,
+def start_defense(frame, angle, impulse, asteroid_name,
                   create_bodies, N, dt):
     """Startet mit frischen Körpern eine Simulation mit ausgewähltem Impuls.
 
@@ -249,7 +249,7 @@ def start_defense(frame, angle, impulse, meteorite_name,
         frame (int): Schritt, ab dem die Geschwindigkeitskorrektur gilt.
         angle (float): Impulswinkel in Grad.
         impulse (float): Impulsbetrag in N s.
-        meteorite_name (str): Eindeutiger Name des Zielmeteoroiden.
+        asteroid_name (str): Eindeutiger Name des Zielasteroiden.
         create_bodies (Callable): Funktion, die frische Himmelskoerper erstellt.
         N (int): Maximale Zahl der Schritte.
         dt (float): Dauer eines Schrittes in s.
@@ -258,16 +258,16 @@ def start_defense(frame, angle, impulse, meteorite_name,
         tuple[np.ndarray, tuple[str, str] | None]: Positionen und ggf. erste Kollision.
     """
     new_bodies = create_bodies()
-    meteorite = next(
-        (body for body in new_bodies if body.name == meteorite_name), None
+    asteroid = next(
+        (body for body in new_bodies if body.name == asteroid_name), None
     )
-    if meteorite is None:
-        raise ValueError(f"Unbekannter Meteoroid: {meteorite_name}")
+    if asteroid is None:
+        raise ValueError(f"Unbekannter Asteroid: {asteroid_name}")
 
     time = frame * dt
     new_r_values, _, new_collision = simulate_system(
         new_bodies, N, dt,
-        meteorite=meteorite,
+        asteroid=asteroid,
         impulse=impulse,
         time=time,
         angle=angle,
@@ -276,13 +276,13 @@ def start_defense(frame, angle, impulse, meteorite_name,
 
 
 @dataclass
-class MeteoroidSettings:
-    """Speichert die von der Oberfläche konfigurierbaren Anfangswerte eines Meteoroiden.
+class AsteroidSettings:
+    """Speichert die von der Oberfläche konfigurierbaren Anfangswerte eines Asteroiden.
 
     Attributes:
         name (str): Individueller Name.
         scenario (str): "Kollision" oder "Vorbeiflug".
-        profile (str): "Klein und Leicht", "Groß und Schwer" oder "Eigener Meteoroid".
+        profile (str): "Klein und Leicht", "Groß und Schwer" oder "Eigener Asteroid".
         catalog_id (str | None): ID des Katalogprofils, falls ausgewählt.
         diameter_m (float): Durchmesser in m; physikalischer Radius ist die Hälfte.
         mass_kg (float): Masse in kg.
@@ -293,19 +293,19 @@ class MeteoroidSettings:
     scenario: str = "Kollision"
     profile: str = "Klein und Leicht"
     catalog_id: str | None = None
-    diameter_m: float = 2 * radius_Meteorid1
-    mass_kg: float = m_Meteorid1
+    diameter_m: float = 2 * radius_Asteroid1
+    mass_kg: float = m_Asteroid1
     position: np.ndarray = field(
-        default_factory=lambda: np.array(r_Meteorid1, dtype=float)
+        default_factory=lambda: np.array(r_Asteroid1, dtype=float)
     )
     velocity: np.ndarray = field(
-        default_factory=lambda: np.array(v_Meteorid1, dtype=float)
+        default_factory=lambda: np.array(v_Asteroid1, dtype=float)
     )
 
 
 # Der Katalog kommt ausschließlich aus values.py. Für den schnellen Zugriff
 # wird einmal ein Index aus den dort definierten Einträgen erzeugt.
-_KATALOG_INDEX = {entry["id"]: entry for entry in METEOROIDEN_KATALOG}
+_KATALOG_INDEX = {entry["id"]: entry for entry in ASTEROIDEN_KATALOG}
 
 
 def profiles(category):
@@ -317,7 +317,7 @@ def profiles(category):
     Returns:
         list[dict]: Alle Profile der angefragten Kategorie.
     """
-    return [entry for entry in METEOROIDEN_KATALOG if entry["category"] == category]
+    return [entry for entry in ASTEROIDEN_KATALOG if entry["category"] == category]
 
 
 def entry_for(profile_id):
@@ -340,13 +340,13 @@ def catalog_settings(profile_id, name):
 
     Args:
         profile_id (str): Eindeutige Katalogkennung.
-        name (str): Frei vergebener Anzeigename des Meteoroiden.
+        name (str): Frei vergebener Anzeigename des Asteroiden.
 
     Returns:
-        MeteoroidSettings: Unabhaengige Konfiguration aus den Katalogwerten.
+        AsteroidSettings: Unabhaengige Konfiguration aus den Katalogwerten.
     """
     entry = entry_for(profile_id)
-    return MeteoroidSettings(
+    return AsteroidSettings(
         name=name,
         scenario="Kollision",
         profile=("Klein und Leicht" if entry["category"] == "Leicht"
@@ -359,25 +359,25 @@ def catalog_settings(profile_id, name):
     )
 
 
-def create_bodies(meteoroids):
-    """Erzeugt Sonne, Erde und *frische* Körper aus MeteoroidSettings.
+def create_bodies(asteroids):
+    """Erzeugt Sonne, Erde und *frische* Körper aus AsteroidSettings.
 
     Jeder Simulationsversuch beginnt so garantiert wieder mit t=0.
 
     Args:
-        meteoroids (list[MeteoroidSettings]): Startwerte der ausgewählten Körper.
+        asteroids (list[AsteroidSettings]): Startwerte der ausgewählten Körper.
 
     Returns:
-        list[CelestialBody]: Sonne, Erde und dann Meteoroiden in Listenreihenfolge.
+        list[CelestialBody]: Sonne, Erde und dann Asteroiden in Listenreihenfolge.
     """
     sun = CelestialBody("Sonne", m_Sonne, radius_Sonne, [0, 0], [0, 0])
     earth_r, earth_v = orbital_data(a_Ellipse, e_Ellipse, m_Sonne)
     earth = CelestialBody("Erde", m_Erde, radius_Erde, earth_r, earth_v)
     bodies = [sun, earth]
-    for meteoroid in meteoroids:
+    for asteroid in asteroids:
         bodies.append(CelestialBody(
-            meteoroid.name, meteoroid.mass_kg, meteoroid.diameter_m / 2,
-            meteoroid.position.copy(), meteoroid.velocity.copy(),
+            asteroid.name, asteroid.mass_kg, asteroid.diameter_m / 2,
+            asteroid.position.copy(), asteroid.velocity.copy(),
         ))
     return bodies
 
@@ -422,11 +422,11 @@ def segment_radius_interval(start, end, radius):
 
 
 def earth_encounter_windows(positions, radius, end_frame=None):
-    """Findet und vereinigt alle Nahbereiche zwischen Erde und Meteoroiden.
+    """Findet und vereinigt alle Nahbereiche zwischen Erde und Asteroiden.
 
     Auch Begegnungen zwischen zwei Stundenwerten werden berücksichtigt,
     sodass die Wiedergabe sie bei hohen Tempofaktoren nicht überspringt.
-    Die Körperreihenfolge ist Sonne, Erde, anschließend Meteoroiden.
+    Die Körperreihenfolge ist Sonne, Erde, anschließend Asteroiden.
     """
     last = len(positions) - 1 if end_frame is None else float(end_frame)
     intervals = []
